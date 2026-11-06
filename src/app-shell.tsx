@@ -24,59 +24,51 @@ export function AppShell() {
               ></canvas>
             </NativeButton>
           </div>
-          <nav aria-label="Main navigation">
+          <nav aria-label="Hovedmeny">
             <NativeButton data-tab="overview" className="nav">
               <span data-icon="overview"></span>
-              {"Overview"}
+              {"Oversikt"}
             </NativeButton>
             <NativeButton data-tab="weather" className="nav active">
               <span data-icon="sun"></span>
-              {"Weather"}
+              {"Vær"}
             </NativeButton>
             <NativeButton data-tab="photos" className="nav">
               <span data-icon="photo"></span>
-              {"Photos"}
+              {"Bilder"}
             </NativeButton>
             <NativeButton data-tab="calendar" className="nav">
               <span data-icon="calendar"></span>
-              {"Calendar"}
-            </NativeButton>
-            <NativeButton data-tab="home" className="nav">
-              <span data-icon="home"></span>
-              {"Home"}
-            </NativeButton>
-            <NativeButton data-tab="youtube" className="nav">
-              <span data-icon="tv"></span>
-              {"YouTube"}
+              {"Kalender"}
             </NativeButton>
             <NativeButton data-tab="settings" className="nav">
               <span data-icon="settings"></span>
-              {"Settings"}
+              {"Innstillinger"}
             </NativeButton>
           </nav>
           <div className="rail-bottom">
             <span className="tiny" id="connection">
-              {"Checking connection"}
+              {"Sjekker tilkoblingen"}
             </span>
           </div>
         </aside>
         <main>
           <header className="topline">
-            <span id="greeting">{"Welcome home."}</span>
+            <span id="greeting">{"Velkommen hjem."}</span>
             <span className="location">
               <span className="status-dot"></span>
-              <span id="location-name">{"Choose your city"}</span>
+              <span id="location-name">{"Velg sted"}</span>
             </span>
           </header>
           <section
             id="setup"
             className="page"
-            aria-label="Set up Skylit"
+            aria-label="Sett opp Skylit"
           ></section>
-          <section id="overview" className="page" aria-label="Overview">
+          <section id="overview" className="page" aria-label="Oversikt">
             <div className="overview-grid">
               <header className="card overview-heading">
-                <h1 id="clock" aria-label="Current time">
+                <h1 id="clock" aria-label="Klokkeslett">
                   <span id="clock-time">{"—"}</span>
                   <small id="clock-period"></small>
                 </h1>
@@ -124,12 +116,12 @@ export function AppShell() {
           <section
             id="weather"
             className="page active"
-            aria-label="Weather"
+            aria-label="Vær"
           ></section>
-          <section id="photos" className="page" aria-label="Photos">
+          <section id="photos" className="page" aria-label="Bilder">
             <div className="page-heading">
               <div>
-                <h1>{"Photos"}</h1>
+                <h1>{"Bilder"}</h1>
               </div>
             </div>
             <article className="card photo-feature">
@@ -203,10 +195,10 @@ export function AppShell() {
               }
             </p>
           </section>
-          <section id="calendar" className="page" aria-label="Calendar">
+          <section id="calendar" className="page" aria-label="Kalender">
             <div className="page-heading">
               <div>
-                <h1>{"Calendar"}</h1>
+                <h1>{"Kalender"}</h1>
               </div>
             </div>
             <div className="cal-top">
@@ -220,7 +212,7 @@ export function AppShell() {
                   {"Review inviters"}
                 </Button>
                 <Button type="submit" id="calendar-setup" variant="secondary">
-                  {"Calendar options"}
+                  {"Kalenderinnstillinger"}
                 </Button>
               </div>
             </div>
@@ -257,18 +249,18 @@ export function AppShell() {
                       type="submit"
                       id="calendar-prev"
                       variant="ghost"
-                      aria-label="Previous month"
+                      aria-label="Forrige måned"
                     >
                       {"‹"}
                     </Button>
                     <Button type="submit" id="calendar-today" variant="ghost">
-                      {"Today"}
+                      {"I dag"}
                     </Button>
                     <Button
                       type="submit"
                       id="calendar-next"
                       variant="ghost"
-                      aria-label="Next month"
+                      aria-label="Neste måned"
                     >
                       {"›"}
                     </Button>
@@ -391,13 +383,13 @@ export function AppShell() {
               </div>
             </article>
           </section>
-          <section id="settings" className="page" aria-label="Settings">
+          <section id="settings" className="page" aria-label="Innstillinger">
             <div className="page-heading">
               <div>
-                <h1>{"Settings"}</h1>
+                <h1>{"Innstillinger"}</h1>
               </div>
               <span id="saved" className="pill" role="status">
-                {"Saved on this frame"}
+                {"Lagret på rammen"}
               </span>
             </div>
             <article className="card setup-revisit">
@@ -412,12 +404,12 @@ export function AppShell() {
               </Button>
             </article>
             <article className="card setting-block">
-              <h3>{"Appearance"}</h3>
+              <h3>{"Utseende"}</h3>
               <label htmlFor="appearance-mode">{"Colour mode"}</label>
               <Select id="appearance-mode">
                 <option value="auto">{"Automatic · sunrise and sunset"}</option>
-                <option value="light">{"Light"}</option>
-                <option value="dark">{"Dark"}</option>
+                <option value="light">{"Lys"}</option>
+                <option value="dark">{"Mørk"}</option>
               </Select>
               <Status
                 id="appearance-note"
@@ -524,7 +516,7 @@ export function AppShell() {
             </article>
             <div className="settings-grid">
               <article className="card setting-block">
-                <h3>{"Weather & time"}</h3>
+                <h3>{"Vær og tid"}</h3>
                 <label htmlFor="city-search">{"Find your city"}</label>
                 <form id="city-form" className="input-row">
                   <Input
@@ -538,7 +530,7 @@ export function AppShell() {
                   </Button>
                 </form>
                 <div id="city-results" role="status"></div>
-                <label htmlFor="units">{"Temperature"}</label>
+                <label htmlFor="units">{"Temperatur"}</label>
                 <Select id="units">
                   <option value="celsius">{"Celsius · °C"}</option>
                   <option value="fahrenheit">{"Fahrenheit · °F"}</option>
@@ -592,14 +584,14 @@ export function AppShell() {
                 </p>
               </article>
               <article className="card setting-block" id="calendar-settings">
-                <h3>{"Your calendars"}</h3>
+                <h3>{"Kalenderne dine"}</h3>
                 <p className="subtle small">
-                  {"Read-only Google Calendar feeds."}
+                  {"Vis kalendere fra DAVx⁵ eller Google Kalender."}
                 </p>
                 <div id="calendar-sources"></div>
                 <Disclosure id="calendar-help">
                   <DisclosureTitle>
-                    {"Where do I find my calendar link?"}
+                    {"Hvor finner jeg kalenderlenken?"}
                   </DisclosureTitle>
                   <ol>
                     <li>
@@ -630,7 +622,7 @@ export function AppShell() {
                   </p>
                 </Disclosure>
                 <form id="calendar-form">
-                  <label htmlFor="calendar-name">{"Calendar name"}</label>
+                  <label htmlFor="calendar-name">{"Kalendernavn"}</label>
                   <Input
                     id="calendar-name"
                     placeholder="Family plans"
@@ -638,7 +630,7 @@ export function AppShell() {
                     required={true}
                     autoComplete="off"
                   />
-                  <label htmlFor="calendar-color">{"Colour"}</label>
+                  <label htmlFor="calendar-color">{"Farge"}</label>
                   <Select id="calendar-color">
                     <option value="#9a513b">{"Terracotta"}</option>
                     <option value="#687354">{"Olive"}</option>
@@ -662,7 +654,7 @@ export function AppShell() {
                     }
                   </p>
                   <Button id="calendar-add" variant="secondary" type="submit">
-                    {"Connect calendar"}
+                    {"Koble til kalender"}
                   </Button>
                   <Status
                     id="calendar-form-status"

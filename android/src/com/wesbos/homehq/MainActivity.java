@@ -144,6 +144,16 @@ public class MainActivity extends Activity {
       catch (Exception e) { return "[]"; }
     }
 
+    @JavascriptInterface public void requestHvalDepartures() {
+      new Thread(() -> {
+        String result = RuterDepartures.fetch();
+        runOnUiThread(() -> {
+          if (dashboard != null) dashboard.evaluateJavascript(
+              "window.SkylitRuter&&window.SkylitRuter.receive(" + result + ")", null);
+        });
+      }, "skylit-ruter").start();
+    }
+
     @JavascriptInterface public String calendarList(){return calendars.snapshot();}
     @JavascriptInterface public String calendarAdd(String name,String color,String url){return calendars.add(name,color,url);}
     @JavascriptInterface public boolean calendarMetadata(String id,String name,String color){return calendars.metadata(id,name,color);}

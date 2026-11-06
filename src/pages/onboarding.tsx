@@ -83,7 +83,7 @@ export function Onboarding() {
   const steps = [
     {
       target: "city-search",
-      title: "Weather & time",
+      title: "Vær og tid",
       description:
         "Find your city for the forecast, clock and automatic night colours.",
       status: labels.city,
@@ -93,7 +93,7 @@ export function Onboarding() {
     },
     {
       target: "photos",
-      title: "Photos",
+      title: "Bilder",
       description:
         "Use a shared Google album, import local pictures, or connect a dedicated Gmail inbox. Set the idle delay in Settings.",
       status: labels.photos,
@@ -103,7 +103,7 @@ export function Onboarding() {
     },
     {
       target: "calendar",
-      title: "Calendar",
+      title: "Kalender",
       description:
         "Add each calendar’s private iCal address on the frame. Events appear in Skylit; edit them in Google Calendar.",
       status: labels.calendar,
@@ -163,7 +163,6 @@ export function Onboarding() {
         ))}
       </div>
       <div className="setup-footer">
-        <p>Home and YouTube are optional. Open either tab when you’re ready.</p>
         <Button id="setup-finish" onClick={finish}>
           Open dashboard
         </Button>

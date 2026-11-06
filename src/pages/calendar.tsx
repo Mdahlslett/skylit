@@ -43,12 +43,12 @@ export function CalendarSources({
           source={s}
           shown={!hidden.includes(s.id)}
           note={
-            s.device ? "Synced by DAVx⁵" : errors.get(s.id) ||
+            s.device ? "Synkronisert av DAVx⁵" : errors.get(s.id) ||
             (busy.has(s.id)
-              ? "Checking calendar…"
+              ? "Sjekker kalenderen …"
               : s.fetchedAt
                 ? "Updated · " + format(s.fetchedAt)
-                : "Waiting for first connection")
+                : "Venter på tilkobling")
           }
           onVisible={onVisible}
           onRemove={onRemove}
@@ -87,7 +87,7 @@ function Source({
             aria-label={"Show " + s.name + " on frame"}
             onChange={(e) => onVisible(s.id, e.target.checked)}
           />
-          <span>Show on frame</span>
+          <span>Vis på rammen</span>
         </label>
         <p className="tiny">{note}</p>
         {editing && (
@@ -99,14 +99,14 @@ function Source({
             }}
           >
             <Input
-              aria-label="Calendar label"
+              aria-label="Kalendernavn"
               value={name}
               maxLength={60}
               required
               onChange={(e) => setName(e.target.value)}
             />
             <Input
-              aria-label="Calendar colour"
+              aria-label="Kalenderfarge"
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
@@ -135,7 +135,7 @@ function Source({
           aria-label={"Remove " + s.name}
           onClick={() => (armed ? onRemove(s.id) : setArmed(true))}
         >
-          {armed ? "Tap to confirm" : "Remove"}
+          {armed ? "Trykk for å bekrefte" : "Fjern"}
         </Button>
         {armed && (
           <Button variant="ghost" onClick={() => setArmed(false)}>

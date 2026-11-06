@@ -9,7 +9,7 @@ function saveGate(){try{localStorage.setItem(gateKey,JSON.stringify(gate));}catc
 function gateMessage(message){$('calendar-gate-status').textContent=message;}
 function applyGate(){events=allEvents.filter(e=>visible(e)&&gateModel.allowed(e,gate));overviewEvents=allOverviewEvents.filter(e=>visible(e)&&gateModel.allowed(e,gate));paint();}
 const prefs=()=>window.SkylitApp.calendarPreferences();
-const day=(date)=>{const p={};new Intl.DateTimeFormat('en-CA',{timeZone:prefs().timezone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date).forEach(x=>p[x.type]=x.value);return p.year+'-'+p.month+'-'+p.day;};
+const day=(date)=>{const p={};new Intl.DateTimeFormat('nb-NO',{timeZone:prefs().timezone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date).forEach(x=>p[x.type]=x.value);return p.year+'-'+p.month+'-'+p.day;};
 const today=()=>day(new Date());
 const addDays=(key,n)=>{const d=new Date(key+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);};
 let selected=today(),month=selected.slice(0,7),activeZone=prefs().timezone,lastToday=today(),hiddenSources=[],search='';
@@ -17,7 +17,7 @@ try{const saved=JSON.parse(localStorage.getItem('skylit.calendarView')||'{}');hi
 function saveView(){try{localStorage.setItem('skylit.calendarView',JSON.stringify({hidden:hiddenSources}));}catch(_){formMessage('Could not save calendar display choices.');}}
 const visible=e=>!hiddenSources.includes(e.source);
 
-const label=(key,options)=>new Intl.DateTimeFormat('en-CA',Object.assign({timeZone:'UTC'},options)).format(new Date(key+'T12:00:00Z'));
+const label=(key,options)=>new Intl.DateTimeFormat('nb-NO',Object.assign({timeZone:'UTC'},options)).format(new Date(key+'T12:00:00Z'));
 function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
 function range(){const first=month+'-01';const start=addDays(first,-new Date(first+'T12:00:00Z').getUTCDay());return {from:start,to:addDays(start,70),zone:prefs().timezone};}
 let renderWorkers=new Set();
@@ -36,7 +36,7 @@ function read(){
   if(bridge.deviceCalendarList) sources=sources.concat(JSON.parse(bridge.deviceCalendarList()));
  }catch(e){sources=[];}
 }
-const deviceAccess=bridge&&bridge.requestDeviceCalendarAccess?node('button','Connect DAVx⁵ calendars','secondary'):null;
+const deviceAccess=bridge&&bridge.requestDeviceCalendarAccess?node('button','Koble til DAVx⁵-kalendere','secondary'):null;
 if(deviceAccess){
  deviceAccess.type='button';
  deviceAccess.onclick=()=>bridge.requestDeviceCalendarAccess();
@@ -55,21 +55,21 @@ function deviceEvents(bounds,byId){
 }
 function settings(){
  if(deviceAccess)deviceAccess.hidden=bridge.deviceCalendarAllowed();
- window.SkylitUI.calendar.sources({sources,hidden:hiddenSources,errors,busy,format:n=>new Intl.DateTimeFormat('en-CA',{timeZone:prefs().timezone,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(n)),onVisible(id,value){hiddenSources=value?hiddenSources.filter(x=>x!==id):[...new Set([...hiddenSources,id])];saveView();applyGate();},onRemove(id){if(!bridge.calendarRemove(id)){formMessage('Could not remove this calendar. Try again.');return;}errors.delete(id);busy.delete(id);formMessage('Calendar removed from this frame.');allEvents=allEvents.filter(e=>e.source!==id);allOverviewEvents=allOverviewEvents.filter(e=>e.source!==id);hiddenSources=hiddenSources.filter(x=>x!==id);saveView();read();applyGate();render();},onEdit(id,name,color){if(!bridge.calendarMetadata||!bridge.calendarMetadata(id,name,color)){formMessage('Edit on the frame. Use a label up to 60 characters and a colour.');return false;}revision++;read();formMessage('Calendar label and colour saved.');render();return true;}});
+ window.SkylitUI.calendar.sources({sources,hidden:hiddenSources,errors,busy,format:n=>new Intl.DateTimeFormat('nb-NO',{timeZone:prefs().timezone,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(n)),onVisible(id,value){hiddenSources=value?hiddenSources.filter(x=>x!==id):[...new Set([...hiddenSources,id])];saveView();applyGate();},onRemove(id){if(!bridge.calendarRemove(id)){formMessage('Could not remove this calendar. Try again.');return;}errors.delete(id);busy.delete(id);formMessage('Calendar removed from this frame.');allEvents=allEvents.filter(e=>e.source!==id);allOverviewEvents=allOverviewEvents.filter(e=>e.source!==id);hiddenSources=hiddenSources.filter(x=>x!==id);saveView();read();applyGate();render();},onEdit(id,name,color){if(!bridge.calendarMetadata||!bridge.calendarMetadata(id,name,color)){formMessage('Edit on the frame. Use a label up to 60 characters and a colour.');return false;}revision++;read();formMessage('Calendar label and colour saved.');render();return true;}});
  $('calendar-add').disabled=!available||sources.filter(s=>!s.device).length>=6;if(!available)formMessage('Connect calendars on the frame. This browser preview does not store private links.');
 }
 function formMessage(text){$('calendar-form-status').textContent=text;}
 function status(){let overviewText='';
   let text='Connect a calendar to bring your plans here.';
-  if(sources.length){const times=sources.map(s=>s.device?Date.now():s.fetchedAt||0);const last=Math.min(...times);const age=Date.now()-last;const failures=errors.size;overviewText=!navigator.onLine?'Offline · Showing saved events.':failures?'Some calendars could not update · Saved events shown where available.':!last?'Waiting for your first calendar update.':age>30*60000?'Saved events · Waiting for a fresh update.':'';
-    text=busy.size?'Refreshing your calendars…':!navigator.onLine?'Offline · Showing saved events.':failures?'Some calendars could not update · Saved events shown where available.':!last?'Waiting for your first calendar update.':age>30*60000?'Saved events · Waiting for a fresh update.':'Up to date';
-    if(last)text+=' · Last refreshed '+new Intl.DateTimeFormat('en-CA',{timeZone:prefs().timezone,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(last));
+  if(sources.length){const times=sources.map(s=>s.device?Date.now():s.fetchedAt||0);const last=Math.min(...times);const age=Date.now()-last;const failures=errors.size;overviewText=!navigator.onLine?'Offline · Showing saved events.':failures?'Some calendars could not update · Saved events shown where available.':!last?'Venter på første kalenderoppdatering.':age>30*60000?'Saved events · Waiting for a fresh update.':'';
+    text=busy.size?'Refreshing your calendars…':!navigator.onLine?'Offline · Showing saved events.':failures?'Some calendars could not update · Saved events shown where available.':!last?'Venter på første kalenderoppdatering.':age>30*60000?'Saved events · Waiting for a fresh update.':'Oppdatert';
+    if(last)text+=' · Last refreshed '+new Intl.DateTimeFormat('nb-NO',{timeZone:prefs().timezone,month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(last));
   }
   $('calendar-status').textContent=text;$('overview-calendar-status').textContent=overviewText;
 
 }
 function onDay(e,key){return e.startDay<=key&&(e.allDay?e.endDay>key:e.endDay>=key);}
-function time(e){if(e.allDay)return 'All day';return new Intl.DateTimeFormat('en-CA',{timeZone:prefs().timezone,hour:'numeric',minute:'2-digit',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(e.start));}
+function time(e){if(e.allDay)return 'Hele dagen';return new Intl.DateTimeFormat('nb-NO',{timeZone:prefs().timezone,hour:'numeric',minute:'2-digit',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(e.start));}
 function paintGate(){
   $('calendar-gate-enable').checked=gate.enabled;$('calendar-unattributed').checked=gate.unattributed;
   if(document.activeElement!==$('calendar-owner'))$('calendar-owner').value=gate.owner;
@@ -89,11 +89,11 @@ function paint(){
   window.SkylitUI.calendar.grid({days,onSelect(key){selected=key;if(key.slice(0,7)!==month){month=key.slice(0,7);render();}else paint();}});
   const anchor=search?range().from:selected,span=search?70:14;let count=0;const groups=[];
   $('calendar-agenda-title').textContent=search?'Search · Loaded dates':label(anchor,{month:'short',day:'numeric'})+' onwards';
-  for(let i=0;i<span;i++){const key=addDays(anchor,i),items=events.filter(e=>onDay(e,key)&&(!search||e.title.toLowerCase().includes(search)));if(!items.length&&(search||i!==0))continue;const rows=[];for(const e of items){if(count++>=100)break;const format=n=>new Intl.DateTimeFormat('en-CA',{timeZone:prefs().timezone,dateStyle:'medium',timeStyle:'short',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(n));rows.push({event:e,time:time(e),range:e.allDay?'':format(e.start)+' – '+format(e.end)});}groups.push({key,title:key===today()?'Today · '+label(key,{month:'short',day:'numeric'}):label(key,{weekday:'short',month:'short',day:'numeric'}),items:rows});if(count>=100)break;}
+  for(let i=0;i<span;i++){const key=addDays(anchor,i),items=events.filter(e=>onDay(e,key)&&(!search||e.title.toLowerCase().includes(search)));if(!items.length&&(search||i!==0))continue;const rows=[];for(const e of items){if(count++>=100)break;const format=n=>new Intl.DateTimeFormat('nb-NO',{timeZone:prefs().timezone,dateStyle:'medium',timeStyle:'short',hourCycle:prefs().clock==='12'?'h12':'h23'}).format(new Date(n));rows.push({event:e,time:time(e),range:e.allDay?'':format(e.start)+' – '+format(e.end)});}groups.push({key,title:key===today()?'Today · '+label(key,{month:'short',day:'numeric'}):label(key,{weekday:'short',month:'short',day:'numeric'}),items:rows});if(count>=100)break;}
   window.SkylitUI.calendar.agenda({groups,empty:count?'':sources.some(s=>!s.device&&!s.fetchedAt)?'Events will appear after the first successful connection.':search?'No matching titles in the loaded dates.':'No plans in the next two weeks.',onCountdown:window.SkylitApp.addCountdown});
   status();settings();paintOverview();paintGate();
 }
-function paintOverview(){const day=today(),list=SkylitOverview.upcoming(overviewEvents,day,Date.now(),3),groups=[];for(const e of list){const key=e.startDay<day?'ongoing':e.startDay;let group=groups[groups.length-1];if(!group||group.key!==key){group={key,title:key==='ongoing'?'Ongoing':key===day?'Today':key===addDays(day,1)?'Tomorrow':label(key,{weekday:'short',month:'short',day:'numeric'}),items:[]};groups.push(group);}group.items.push({event:e,time:time(e)});}window.SkylitUI.calendar.overview({groups,multiple:sources.length>1,empty:list.length?'':!sources.length?'Add a calendar to see upcoming events.':sources.some(s=>!s.device&&!s.fetchedAt)?'Waiting for the first calendar update.':'No upcoming events in the next two weeks.',onSelect(e){selected=e.startDay<today()?today():e.startDay;month=selected.slice(0,7);window.SkylitApp.go('calendar');render();},onAdd:sources.length?null:()=>window.SkylitApp.openSettings?window.SkylitApp.openSettings('calendars','overview'):setup()});}
+function paintOverview(){const day=today(),list=SkylitOverview.upcoming(overviewEvents,day,Date.now(),3),groups=[];for(const e of list){const key=e.startDay<day?'ongoing':e.startDay;let group=groups[groups.length-1];if(!group||group.key!==key){group={key,title:key==='ongoing'?'Pågår':key===day?'I dag':key===addDays(day,1)?'I morgen':label(key,{weekday:'short',month:'short',day:'numeric'}),items:[]};groups.push(group);}group.items.push({event:e,time:time(e)});}window.SkylitUI.calendar.overview({groups,multiple:sources.length>1,empty:list.length?'':!sources.length?'Add a calendar to see upcoming events.':sources.some(s=>!s.device&&!s.fetchedAt)?'Waiting for the first calendar update.':'No upcoming events in the next two weeks.',onSelect(e){selected=e.startDay<today()?today():e.startDay;month=selected.slice(0,7);window.SkylitApp.go('calendar');render();},onAdd:sources.length?null:()=>window.SkylitApp.openSettings?window.SkylitApp.openSettings('calendars','overview'):setup()});}
 async function render(){
  read();
  for(const cancel of renderWorkers)cancel();

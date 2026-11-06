@@ -5,7 +5,9 @@
   const node=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
   const legacy=()=>{try{return SkylitFrameModel.preferences(JSON.parse(localStorage.getItem('skylit.frame')||'{}'));}catch(_){return {};}};
   let raw;try{raw=JSON.parse(localStorage.getItem(key));}catch(_){}
-  let saved=model.normalize(raw,legacy()),draft=model.copy(saved),selected=null,drag=null,ignoreClick=false,scrollFrame=0,moveFrame=0,pendingMove=null,saveError=false;
+  let saved=model.normalize(raw,legacy());
+  if(!raw)saved=model.add(saved,'ruter').layout;
+  let draft=model.copy(saved),selected=null,drag=null,ignoreClick=false,scrollFrame=0,moveFrame=0,pendingMove=null,saveError=false;
   const wrappers=new Map(),originals=new Map([
     ['clock',document.querySelector('.overview-heading')],['weather',document.querySelector('.overview-weather')],
     ['photos',$('overview-photos')],['plans',document.querySelector('.overview-plans')]
@@ -19,7 +21,7 @@
       window.SkylitUI.renderNode(action,window.SkylitUI.template("ModuleActionIcon"));
       action.setAttribute('aria-label',definition.type==='forecast'?'Open full weather forecast':'Manage '+definition.name.toLowerCase());
       action.onclick=()=>definition.type==='forecast'?app.go('weather'):definition.type==='note'||definition.type==='countdowns'?app.openSettings('household','overview'):app.go('household');
-      heading.append(title,action);wrapper.append(heading,node('div','dashboard-module-content'));
+      heading.append(title);if(definition.type!=='ruter')heading.append(action);wrapper.append(heading,node('div','dashboard-module-content'));
     }
     wrapper.hidden=true;wrappers.set(definition.type,wrapper);grid.append(wrapper);
   }
@@ -76,14 +78,46 @@
     const prefs=app.calendarPreferences(),data=SkylitClock.read(Date.now(),prefs.timezone,prefs.clock);
     if(live)clockVisual.update('analog',data);if(sample)sampleVisual.update('analog',data);
   },1000);
-  const photoEmpty=node('button','dashboard-photo-empty');photoEmpty.textContent='Choose photos';photoEmpty.onclick=()=>app.openSettings('photos','overview');wrappers.get('photos').append(photoEmpty);
-  const empty=node('div','dashboard-empty');empty.append(node('h2',null,'Your dashboard is empty'));const configure=node('button','secondary','Choose modules');configure.onclick=()=>app.openSettings('dashboard','overview');empty.append(configure);grid.append(empty);
+  const photoEmpty=node('button','dashboard-photo-empty');photoEmpty.textContent='Velg bilder';photoEmpty.onclick=()=>app.openSettings('photos','overview');wrappers.get('photos').append(photoEmpty);
+  const empty=node('div','dashboard-empty');empty.append(node('h2',null,'Dashbordet er tomt'));const configure=node('button','secondary','Velg moduler');configure.onclick=()=>app.openSettings('dashboard','overview');empty.append(configure);grid.append(empty);
   function position(n,item){n.dataset.widgetStyle=item.style||model.styles[item.type]?.[0]||'';n.style.gridColumn=(item.x+1)+' / span '+item.w;n.style.gridRow=(item.y+1)+' / span '+item.h;}
+  const ruterCard=wrappers.get('ruter'),ruterContent=ruterCard.querySelector('.dashboard-module-content');
+  let departures=[],ruterUpdated=0,ruterRequest=0,ruterError=false;
+  function paintRuter(){
+    if(ruterCard.hidden)return;
+    const now=Date.now();
+    const current=departures.filter(item=>Date.parse(item.time)>=now).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time)).slice(0,3);
+    const rows=current.map(item=>{
+      const row=node('p','small');
+      const minutes=Math.ceil((Date.parse(item.time)-now)/60000);
+      row.append(node('strong',null,item.line+' '+item.destination),document.createTextNode(' · '+(minutes<=1?'nå':minutes+' min')+(item.realtime?'':' (rutetid)')));
+      return row;
+    });
+    if(!rows.length)rows.push(node('p','small subtle',ruterError?'Kunne ikke hente avganger.':ruterUpdated?'Ingen kommende avganger.':'Henter avganger …'));
+    else if(ruterError)rows.push(node('p','tiny subtle','Viser sist hentede avganger.'));
+    ruterContent.replaceChildren(...rows);
+  }
+  function refreshRuter(){
+    if(ruterCard.hidden||app.status().tab!=='overview'||document.hidden)return;
+    const now=Date.now();
+    if(!window.Skylit||!window.Skylit.requestHvalDepartures){ruterError=true;paintRuter();return;}
+    if(now-ruterRequest>=60000){ruterRequest=now;window.Skylit.requestHvalDepartures();}
+    paintRuter();
+  }
+  window.SkylitRuter={receive(result){
+    ruterError=!Array.isArray(result);
+    if(!ruterError){departures=result;ruterUpdated=Date.now();}
+    paintRuter();
+  }};
+  window.addEventListener('skylit-tab',refreshRuter);
+  document.addEventListener('visibilitychange',refreshRuter);
+  setInterval(refreshRuter,15000);
+
   function applyLayout(){
     for(const [type,n] of wrappers){const item=saved.modules.find(item=>item.type===type);n.hidden=!item;if(item)position(n,item);}
     // Match reading and keyboard order to the visible arrangement.
     saved.modules.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(item=>grid.append(wrappers.get(item.type)));
-    empty.hidden=!!saved.modules.length;paintClock();sizeModules();renderUtilities();
+    empty.hidden=!!saved.modules.length;paintClock();sizeModules();renderUtilities();refreshRuter();
   }
   function sizePhotos(host,w,h){
     if(host.dataset.widgetStyle!=='prints')return;
@@ -136,7 +170,7 @@
     }
     paintTimers();
   }
-  function paintTimers(){const timers=app.householdState().timers;document.querySelectorAll('[data-dashboard-timer]').forEach(n=>{const item=timers.find(item=>item.id===n.dataset.dashboardTimer);if(!item)return;const seconds=Math.max(0,Math.ceil((item.end-Date.now())/1000));n.textContent=seconds?Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):'Time is up';});}
+  function paintTimers(){const timers=app.householdState().timers;document.querySelectorAll('[data-dashboard-timer]').forEach(n=>{const item=timers.find(item=>item.id===n.dataset.dashboardTimer);if(!item)return;const seconds=Math.max(0,Math.ceil((item.end-Date.now())/1000));n.textContent=seconds?Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):'Tiden er ute';});}
   window.addEventListener('skylit-household',renderUtilities);window.addEventListener('skylit-preferences',()=>{renderUtilities();renderForecast();});
   window.addEventListener('skylit-display',sizeModules);window.addEventListener('skylit-tab',sizeModules);window.addEventListener('online',renderForecast);window.addEventListener('offline',renderForecast);
   setInterval(()=>{if(app.status().tab==='overview'&&!app.settingsOpen()){if(today()!==renderedDay)renderUtilities();else paintTimers();}},1000);
@@ -147,7 +181,7 @@
   clockSample=$('dashboard-clock-preview');sampleVisual=SkylitClock.create(document);clockSample.classList.add('clock-frame');const sampleTime=node('div','clock-sample-time clock-time'),sampleDate=node('p','clock-sample-date clock-date');sampleTime.append(node('span','clock-sample-digits'),node('span','clock-sample-period'));observer.observe(clockSample);sampleTime.setAttribute('aria-hidden','true');sampleDate.setAttribute('aria-hidden','true');clockSample.append(sampleVisual.root,sampleTime,sampleDate);
   stylePicker.onchange=()=>{const next=model.change(draft,'clock',{style:stylePicker.value});if(next){draft=next;preset.value='custom';paintPositions();message('Clock style changed. Saved on this frame.');}};
   const start=$('dashboard-starting-layout'),presetLabel=document.querySelector('label[for=overview-preset]'),preset=$('overview-preset');
-  presetLabel.textContent='Starting layout';start.append(presetLabel,preset);const custom=node('option',null,'Custom');custom.value='custom';custom.disabled=true;preset.prepend(custom);
+  presetLabel.textContent='Startoppsett';start.append(presetLabel,preset);const custom=node('option',null,'Tilpasset');custom.value='custom';custom.disabled=true;preset.prepend(custom);
   preset.value='custom';preset.onchange=()=>{const style=draft.modules.find(item=>item.type==='clock')?.style||'classic';draft=model.change(model.preset(preset.value),'clock',{style});selected=null;paintEditor();message('Starting layout selected. Saved on this frame.');};
   // The old optional excerpt migrates to a real Note module; configuration now lives here.
   $('household-excerpt').closest('label').remove();
@@ -189,7 +223,7 @@
     clockOptions.hidden=selected!=='clock'||!item;visualOptions.hidden=!item||!['photos','weather'].includes(selected);if(!visualOptions.hidden)SkylitUI.dashboard.styles(visualOptions,{type:selected,value:item.style||model.styles[selected][0],pictures:Array.from($('overview-photos').querySelectorAll('img')).map(i=>i.src),temperature:$('overview-temperature').textContent,onChange(style){const next=model.change(draft,selected,{style});if(next){draft=next;paintPositions();message('Widget style saved.');}}});if(!item)return;const definition=model.definition(selected);stylePicker.value=SkylitClock.style(item.style);if(selected==='clock'&&clockSample.dataset.clockStyle!==stylePicker.value)paintClock();$('dashboard-selection-title').textContent=definition.name;
 
   }
-  function paintPositions(notify=true){if(!drag&&!persist())return;draft.modules.forEach(item=>{const tile=tiles.get(item.type);position(tile,item);tile.querySelector('.dashboard-editor-size').textContent=item.w+' × '+item.h;});if(drag){if(livePreview&&clockData)livePreview.geometry(draft);return;}paintSelection();if(livePreview&&clockData&&editorVisible()){livePreview.render(draft,wrappers,clockData);fitPreview();}if(app.settingsFeedback)app.settingsFeedback(saveError?'Could not save dashboard change':'Saved on this frame');if(notify)window.dispatchEvent(new Event('skylit-dashboard-draft'));}
+  function paintPositions(notify=true){if(!drag&&!persist())return;draft.modules.forEach(item=>{const tile=tiles.get(item.type);position(tile,item);tile.querySelector('.dashboard-editor-size').textContent=item.w+' × '+item.h;});if(drag){if(livePreview&&clockData)livePreview.geometry(draft);return;}paintSelection();if(livePreview&&clockData&&editorVisible()){livePreview.render(draft,wrappers,clockData);fitPreview();}if(app.settingsFeedback)app.settingsFeedback(saveError?'Could not save dashboard change':'Lagret på rammen');if(notify)window.dispatchEvent(new Event('skylit-dashboard-draft'));}
   function paintEditor(){
     window.SkylitUI.dashboard.tiles({modules:draft.modules,selected,definition:model.definition,onSelect(type){selected=type;paintSelection();},onRemove:removeWidget,onBegin:begin,onKey:keyboard,register(type,element){if(element)tiles.set(type,element);else tiles.delete(type);}});
     paintGallery();
@@ -221,13 +255,13 @@
   function finish(e,cancelled=false){if(!drag)return;if(cancelled){cancelAnimationFrame(moveFrame);moveFrame=0;pendingMove=null;}else{pendingMove={clientX:e.clientX,clientY:e.clientY};flushMove();}const operation=drag;drag=null;livePreview.endGeometry();ghost.hidden=true;cancelAnimationFrame(scrollFrame);preview.classList.remove('drop-active','invalid-drop');
     if(operation.mode==='gallery'){ignoreClick=Math.hypot(e.clientX-operation.startX,e.clientY-operation.startY)>8;
       const rect=preview.getBoundingClientRect(),inside=e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom;
-      if(!cancelled&&inside&&operation.position){const result=model.add(draft,operation.type,operation.position);if(result.added){draft=result.layout;selected=operation.type;paintEditor();message('Module added. Saved on this frame.');}else message('No room here. Move or resize a widget to make space.');}setTimeout(()=>ignoreClick=false,0);return;
+      if(!cancelled&&inside&&operation.position){const result=model.add(draft,operation.type,operation.position);if(result.added){draft=result.layout;selected=operation.type;paintEditor();message('Modulen er lagt til og lagret på rammen.');}else message('No room here. Move or resize a widget to make space.');}setTimeout(()=>ignoreClick=false,0);return;
     }
     if(cancelled){draft=operation.start;paintPositions();return;}
     if(JSON.stringify(operation.start)!==JSON.stringify(draft)){preset.value='custom';paintPositions();message('Layout saved on this frame.');}else paintPositions(false);
   }
   document.addEventListener('pointerup',e=>finish(e));document.addEventListener('pointercancel',e=>finish(e,true));
-  function paintGallery(){window.SkylitUI.dashboard.gallery({catalog:model.catalog,included:draft.modules.map(m=>m.type),clock:clockData?clockData.hourText+':'+clockData.minuteText:'—',temperature:$('overview-temperature').textContent,pictures:Array.from($('overview-photos').querySelectorAll('img')).slice(0,3).map(image=>image.src),onAdd(type){if(ignoreClick)return;const slot=model.placement(draft,type,{x:6,y:6}),result=slot?model.add(draft,type,slot):{added:false};if(!result.added||result.rearranged){message('Make room by moving, resizing or removing a widget first. Your layout is unchanged.');return;}draft=result.layout;selected=type;preset.value='custom';paintEditor();message('Module added. Saved on this frame.');},onBegin(e,type){if((e.button!==0&&!(e.pointerType==='touch'&&e.buttons===1))||drag)return;e.preventDefault();ghost.replaceChildren();const art=panel.querySelector('[data-preview-type='+type+']');if(art)ghost.append(art.cloneNode(true));drag={type,mode:'gallery',startX:e.clientX,startY:e.clientY};e.currentTarget.setPointerCapture(e.pointerId);trackScroll(e);}});}
+  function paintGallery(){window.SkylitUI.dashboard.gallery({catalog:model.catalog,included:draft.modules.map(m=>m.type),clock:clockData?clockData.hourText+':'+clockData.minuteText:'—',temperature:$('overview-temperature').textContent,pictures:Array.from($('overview-photos').querySelectorAll('img')).slice(0,3).map(image=>image.src),onAdd(type){if(ignoreClick)return;const slot=model.placement(draft,type,{x:6,y:6}),result=slot?model.add(draft,type,slot):{added:false};if(!result.added||result.rearranged){message('Make room by moving, resizing or removing a widget first. Your layout is unchanged.');return;}draft=result.layout;selected=type;preset.value='custom';paintEditor();message('Modulen er lagt til og lagret på rammen.');},onBegin(e,type){if((e.button!==0&&!(e.pointerType==='touch'&&e.buttons===1))||drag)return;e.preventDefault();ghost.replaceChildren();const art=panel.querySelector('[data-preview-type='+type+']');if(art)ghost.append(art.cloneNode(true));drag={type,mode:'gallery',startX:e.clientX,startY:e.clientY};e.currentTarget.setPointerCapture(e.pointerId);trackScroll(e);}});}
   function removeWidget(type){draft=model.remove(draft,type);selected=null;preset.value='custom';paintEditor();message('Widget removed. Its content stays saved.');}
   $('dashboard-remove').onclick=()=>removeWidget(selected);$('dashboard-remove').hidden=true;
 

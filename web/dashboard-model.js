@@ -4,15 +4,16 @@
   const styles={clock:['classic','analog','stacked','digital'],photos:['prints','mosaic','spotlight'],weather:['landscape','minimal','sky']};
   function setStyle(item,value){if(value===styles[item.type]?.[0]||!styles[item.type]?.includes(value))delete item.style;else item.style=value;return item;}
   const catalog=[
-    {type:'clock',name:'Clock & date',description:'Time and date in your selected city.',minW:3,minH:3},
-    {type:'weather',name:'Weather',description:'Current conditions and the familiar landscape.',minW:3,minH:4},
-    {type:'photos',name:'Photos',description:'Your curated local pictures; tap to open Photos.',minW:3,minH:3},
-    {type:'plans',name:'Upcoming events',description:'Plans anchored to today, independent of month browsing.',minW:3,minH:4},
-    {type:'forecast',name:'Hourly forecast',description:'The next few hours from your existing forecast.',minW:3,minH:4},
-    {type:'note',name:'Note',description:'The pinned note from Household settings.',minW:3,minH:3},
-    {type:'shopping',name:'Shopping list',description:'Check off items on your shared on-frame list.',minW:3,minH:4},
-    {type:'countdowns',name:'Countdowns',description:'Days until your saved occasions.',minW:3,minH:3},
-    {type:'timers',name:'Timers',description:'Your running on-frame timers; no background alarm.',minW:3,minH:3}
+    {type:'ruter',name:'Ruter · Hval',description:'Neste bussavganger fra Hval i Asker.',minW:3,minH:4},
+    {type:'clock',name:'Klokke og dato',description:'Tid og dato for valgt sted.',minW:3,minH:3},
+    {type:'weather',name:'Vær',description:'Været akkurat nå.',minW:3,minH:4},
+    {type:'photos',name:'Bilder',description:'Lokale bilder. Trykk for å åpne Bilder.',minW:3,minH:3},
+    {type:'plans',name:'Kommende avtaler',description:'Kommende avtaler fra og med i dag.',minW:3,minH:4},
+    {type:'forecast',name:'Timevarsel',description:'Værvarsel for de neste timene.',minW:3,minH:4},
+    {type:'note',name:'Notat',description:'Notatet fra innstillingene for husstanden.',minW:3,minH:3},
+    {type:'shopping',name:'Handleliste',description:'Kryss av varer på handlelisten.',minW:3,minH:4},
+    {type:'countdowns',name:'Nedtellinger',description:'Dager til merkedagene dine.',minW:3,minH:3},
+    {type:'timers',name:'Tidtakere',description:'Tidtakere som kjører på rammen.',minW:3,minH:3}
   ];
   const definition=type=>catalog.find(item=>item.type===type);
   const copy=layout=>({version:1,modules:layout.modules.map(item=>({...item}))});
@@ -61,6 +62,7 @@
     const next=copy(layout),item={type,x:0,y:0,w:4,h:4};
     if(position){item.x=position.x;item.y=position.y;item.w=position.w??4;item.h=position.h??4;if(valid(item)&&!next.modules.some(other=>overlaps(item,other))){next.modules.push(item);return {layout:next,added:true,rearranged:false};}return {layout:next,added:false,rearranged:false};}
     for(let y=0;y<=rows-item.h;y++)for(let x=0;x<=columns-item.w;x++){item.x=x;item.y=y;if(!next.modules.some(other=>overlaps(item,other))){next.modules.push({...item});return {layout:next,added:true,rearranged:false};}}
+    if(next.modules.length>=9)return {layout:next,added:false,rearranged:false};
     next.modules.push(item);return {layout:arrange(next),added:true,rearranged:true};
   }
   const remove=(layout,type)=>({version:1,modules:layout.modules.filter(item=>item.type!==type).map(item=>({...item}))});

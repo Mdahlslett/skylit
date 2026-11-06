@@ -42,10 +42,12 @@ jobs:
       - name: Build and verify APK
         run: |
           node --check web/calendar.js
+          node --check web/dashboard.js
+          node --test tests/dashboard-model.test.cjs
           npm run typecheck
           python3 scripts/build.py --webview74
           python3 scripts/check_public.py --apk dist/skylit-webview74.apk
-          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging dist/skylit-webview74.apk | grep -E "^package: name='com.wesbos.homehq.webview74.davx'"
+          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging dist/skylit-webview74.apk | grep -E "^package: name='com.wesbos.homehq.webview74.norsk'"
       - uses: actions/upload-artifact@v4
         with:
           name: skylit-webview74
