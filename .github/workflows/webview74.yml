@@ -18,6 +18,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - uses: android-actions/setup-android@v3
       - run: npm ci --ignore-scripts
       - name: Prepare Android tools and temporary signing key
         run: |
