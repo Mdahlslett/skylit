@@ -26,7 +26,7 @@ export function ShoppingList({
       </NativeButton>
     ))
   ) : empty ? (
-    <p className="subtle small">Your list is clear.</p>
+    <p className="subtle small">Handlelista er tom.</p>
   ) : null;
 }
 export function CountdownList({

@@ -90,7 +90,7 @@ export function AppShell() {
               </NativeButton>
               <article className="card overview-plans">
                 <div className="section-title">
-                  <h2>{"Upcoming"}</h2>
+                  <h2>{"Ukeplan"}</h2>
                   <Button
                     type="submit"
                     variant="ghost"

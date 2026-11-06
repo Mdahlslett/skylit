@@ -219,7 +219,7 @@ function WidgetMiniature({
   if (type === "clock")
     return (
       <span className="widget-mini-clock">
-        <small>Today</small>
+        <small>I dag</small>
         <b>{clock}</b>
         <i />
       </span>
@@ -227,7 +227,7 @@ function WidgetMiniature({
   if (type === "weather")
     return (
       <span className="widget-mini-weather">
-        <small>Right now</small>
+        <small>Akkurat nå</small>
         <b>{temperature}</b>
         <Icon name="sun" />
         <i />
@@ -248,7 +248,7 @@ function WidgetMiniature({
   if (type === "plans")
     return (
       <span className="widget-mini-list">
-        <b>Upcoming</b>
+        <b>Kommende</b>
         <span>10:00 · Breakfast</span>
         <span>15:00 · A walk</span>
       </span>
@@ -357,7 +357,7 @@ export function DashboardUtility({
             <strong>{item.title}</strong>
             <span>
               {delta === 0
-                ? "Today"
+                ? "I dag"
                 : delta > 0
                   ? delta + " days away"
                   : Math.abs(delta) + " days ago"}

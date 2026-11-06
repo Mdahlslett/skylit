@@ -127,18 +127,18 @@
   $('show-household').checked=prefs.household;$('show-household').onchange=()=>setPref('household',$('show-household').checked);$('household-excerpt').checked=prefs.excerpt;$('household-excerpt').onchange=()=>setPref('excerpt',$('household-excerpt').checked);$('household-open').onclick=()=>app.go('household');$('household-options').onclick=()=>openSettings('household','household');$('note-edit').onclick=()=>{openSettings('household','household');$('household-note-input').focus();};$('household-note-input').value=house.note;
   app.householdState=()=>model.household(house);app.toggleShopping=target=>{const item=house.shopping.find(item=>item.id===target);if(!item)return false;remember();return saveHouse({...house,shopping:house.shopping.map(row=>row.id===target?{...row,done:!row.done}:row)});};
   function saveHouse(next){next=model.household(next);if(!write('skylit.household',next))return false;house=next;renderHousehold();return true;}
-  $('household-note-save').onclick=()=>{if(saveHouse({...house,note:$('household-note-input').value}))saved('Note saved on this frame.');};
+  $('household-note-save').onclick=()=>{if(saveHouse({...house,note:$('household-note-input').value}))saved('Beskjeden er lagret.');};
   const id=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);let undo=null;
   function remember(){undo=JSON.parse(JSON.stringify(house.shopping));$('shopping-undo').hidden=false;}
-  $('shopping-add').onsubmit=e=>{e.preventDefault();const text=$('shopping-input').value.trim();if(!text)return;if(house.shopping.length>=60){app.notify('The list is full. Clear completed items first.');return;}remember();if(saveHouse({...house,shopping:house.shopping.concat({id:id(),text,done:false})}))$('shopping-input').value='';};
+  $('shopping-add').onsubmit=e=>{e.preventDefault();const text=$('shopping-input').value.trim();if(!text)return;if(house.shopping.length>=60){app.notify('Handlelista er full. Fjern avkryssede varer først.');return;}remember();if(saveHouse({...house,shopping:house.shopping.concat({id:id(),text,done:false})}))$('shopping-input').value='';};
   $('shopping-undo').onclick=()=>{if(undo&&saveHouse({...house,shopping:undo})){undo=null;$('shopping-undo').hidden=true;}};
   $('shopping-clear').onclick=()=>{remember();saveHouse({...house,shopping:house.shopping.filter(x=>!x.done)});};
   const excerpt=element('button','overview-note');excerpt.id='overview-note';excerpt.hidden=true;excerpt.onclick=()=>app.go('household');document.querySelector('.overview-heading').append(excerpt);
   function today(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:app.calendarPreferences().timezone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),get=k=>parts.find(x=>x.type===k).value;return get('year')+'-'+get('month')+'-'+get('day');}
-  function renderHousehold(){if(!$('shopping-items'))return;$('household-note').textContent=house.note||'Add a note in Household options.';
+  function renderHousehold(){if(!$('shopping-items'))return;$('household-note').textContent=house.note||'Legg inn en beskjed.';
     const onToggle=id=>{remember();saveHouse({...house,shopping:house.shopping.map(x=>x.id===id?{...x,done:!x.done}:x)});};
     for(const done of [false,true])window.SkylitUI.household.shopping(done?'shopping-completed':'shopping-items',{items:house.shopping.filter(x=>x.done===done),empty:!done,onToggle});
-    $('shopping-completed-label').textContent='Completed · '+house.shopping.filter(x=>x.done).length;
+    $('shopping-completed-label').textContent='Avkrysset · '+house.shopping.filter(x=>x.done).length;
     excerpt.hidden=!prefs.excerpt||!house.note;excerpt.parentElement.classList.toggle('with-note',!excerpt.hidden);excerpt.textContent=house.note.slice(0,90);$('household-dates-card').hidden=!house.countdowns.length;
     const props={items:house.countdowns,today:today(),dayDelta:model.dayDelta,onRemove:i=>saveHouse({...house,countdowns:house.countdowns.filter((_,n)=>n!==i)})};window.SkylitUI.household.countdowns('household-countdowns',props);window.SkylitUI.household.countdowns('countdown-edit',{...props,editing:true});paintTimers();window.dispatchEvent(new Event('skylit-household'));}
   function addCountdown(title,date){if(!model.date(date)||!String(title).trim()||house.countdowns.length>=5)return false;return saveHouse({...house,countdowns:house.countdowns.concat({title:String(title).slice(0,60),date})});}

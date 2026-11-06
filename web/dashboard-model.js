@@ -10,7 +10,7 @@
     {type:'photos',name:'Bilder',description:'Lokale bilder. Trykk for å åpne Bilder.',minW:3,minH:3},
     {type:'plans',name:'Kommende avtaler',description:'Kommende avtaler fra og med i dag.',minW:3,minH:4},
     {type:'forecast',name:'Timevarsel',description:'Værvarsel for de neste timene.',minW:3,minH:4},
-    {type:'note',name:'Notat',description:'Notatet fra innstillingene for husstanden.',minW:3,minH:3},
+    {type:'note',name:'Beskjed',description:'Notatet fra innstillingene for husstanden.',minW:3,minH:3},
     {type:'shopping',name:'Handleliste',description:'Kryss av varer på handlelisten.',minW:3,minH:4},
     {type:'countdowns',name:'Nedtellinger',description:'Dager til merkedagene dine.',minW:3,minH:3},
     {type:'timers',name:'Tidtakere',description:'Tidtakere som kjører på rammen.',minW:3,minH:3}
@@ -20,7 +20,9 @@
   function preset(name='balanced'){
     if(name==='week')return {version:1,modules:[
       {type:'clock',x:0,y:0,w:12,h:3},
-      {type:'plans',x:0,y:3,w:9,h:9},
+      {type:'plans',x:0,y:3,w:9,h:6},
+      {type:'note',x:0,y:9,w:4,h:3},
+      {type:'photos',x:4,y:9,w:5,h:3},
       {type:'ruter',x:9,y:3,w:3,h:5},
       {type:'weather',x:9,y:8,w:3,h:4},
     ]};
