@@ -59,11 +59,21 @@ test('widget swaps exchange complete slots while preserving style and size const
 test('palette placements fit a three-row gap and reject a fully occupied grid',()=>{
  const l=model.preset();l.modules.find(m=>m.type==='weather').y=7;l.modules.find(m=>m.type==='weather').h=5;l.modules.find(m=>m.type==='plans').y=7;l.modules.find(m=>m.type==='plans').h=5;
  for(const type of ['timers','countdowns']){const slot=model.placement(l,type,{x:6,y:5.5});assert.equal(slot.h,3);assert.equal(slot.y,4);const result=model.add(l,type,slot);assert.equal(result.added,true);sound(result.layout);}
- assert.equal(model.placement(model.preset(),'timers',{x:6,y:6}),null);assert.equal(model.placement(l,'clock',{x:6,y:6}),null);
+ assert.equal(model.placement(model.preset('week'),'timers',{x:6,y:6}),null);assert.equal(model.placement(l,'clock',{x:6,y:6}),null);
 });
 test('photo and weather styles persist through normalize, resize, swap and packing without accepting unknown values',()=>{
  for(const type of ['photos','weather'])for(const style of model.styles[type]){
   let layout=model.change(model.preset(),type,{style});assert.ok(layout);const actual=l=>l.modules.find(m=>m.type===type).style||model.styles[type][0];assert.equal(actual(model.normalize(JSON.parse(JSON.stringify(layout)))),style);assert.equal(actual(model.arrange(layout)),style);assert.equal(actual(model.swap(layout,type,'clock')),style);
  }
  assert.equal(model.change(model.preset(),'photos',{style:'analog'}),null);const raw=model.preset();raw.modules[2].style='<script>';assert.equal(model.normalize(raw).modules[2].style,undefined);
+});
+
+test('week view stacks a full-width photo under the note without overlaps',()=>{
+  const layout=model.preset('week');
+  sound(layout);
+  const note=layout.modules.find(item=>item.type==='note');
+  const photo=layout.modules.find(item=>item.type==='photos');
+  assert.equal(photo.y,note.y+note.h);
+  assert.equal(photo.x,0);
+  assert.equal(photo.w,model.columns);
 });

@@ -142,6 +142,7 @@
   setInterval(refreshRuter,15000);
 
   function applyLayout(){
+    grid.style.setProperty('--dashboard-rows',Math.max(12,...saved.modules.map(item=>item.y+item.h)));
     for(const [type,n] of wrappers){const item=saved.modules.find(item=>item.type===type);n.hidden=!item;if(item)position(n,item);if(type==='plans')n.dataset.week=String(!!item&&item.w>=7);}
     // Match reading and keyboard order to the visible arrangement.
     saved.modules.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(item=>grid.append(wrappers.get(item.type)));
@@ -263,13 +264,13 @@
   function cellDelta(e){const rect=preview.getBoundingClientRect();return [Math.round((e.clientX-drag.startX)/rect.width*model.columns),Math.round((e.clientY-drag.startY+drag.previewTop-rect.top)/rect.height*model.rows)];}
   function move(e){if(!drag)return;
     if(drag.mode==='gallery'){const rect=preview.getBoundingClientRect();if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom){drag.position=null;ghost.hidden=true;preview.classList.remove('invalid-drop','drop-active');return;}
-      const point={x:(e.clientX-rect.left)/rect.width*12,y:(e.clientY-rect.top)/rect.height*12},slot=model.placement(draft,drag.type,point);drag.position=slot;preview.classList.toggle('invalid-drop',!slot);preview.classList.add('drop-active');ghost.hidden=!slot;if(slot){position(ghost,slot);message('Release to add '+model.definition(drag.type).name+' in the highlighted space.');}else message('No open space fits this widget yet. Resize or remove a widget.');return;}
+      const point={x:(e.clientX-rect.left)/rect.width*12,y:(e.clientY-rect.top)/rect.height*model.rows},slot=model.placement(draft,drag.type,point);drag.position=slot;preview.classList.toggle('invalid-drop',!slot);preview.classList.add('drop-active');ghost.hidden=!slot;if(slot){position(ghost,slot);message('Release to add '+model.definition(drag.type).name+' in the highlighted space.');}else message('No open space fits this widget yet. Resize or remove a widget.');return;}
 
     const [dx,dy]=cellDelta(e),item=drag.item,resizing=drag.mode.startsWith('resize'),corner=drag.mode.slice(7)||'se';
     const patch=resizing?{x:item.x+(corner.includes('w')?dx:0),y:item.y+(corner.includes('n')?dy:0),w:item.w+(corner.includes('w')?-dx:dx),h:item.h+(corner.includes('n')?-dy:dy)}:{x:item.x+dx,y:item.y+dy};
     let next=model.change(drag.start,drag.type,patch),swapped=false;
     if(!next&&!resizing&&Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>12){
-      const r=preview.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*12,y=(e.clientY-r.top)/r.height*12;
+      const r=preview.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*12,y=(e.clientY-r.top)/r.height*model.rows;
       const target=drag.start.modules.find(m=>m.type!==drag.type&&x>=m.x+.3&&x<m.x+m.w-.3&&y>=m.y+.3&&y<m.y+m.h-.3);
       if(target){next=model.swap(drag.start,drag.type,target.type);swapped=!!next;}
     }

@@ -201,7 +201,31 @@
     });
     meals.append(list);
   }
+  const overview = document.getElementById('overview');
+  const bottom = node('div', '', 'family-overview');
+  bottom.setAttribute('aria-label', 'Familie');
+  overview.append(bottom);
+  const summaries = [['Handleliste','shopping'],['Gjøremål','chores'],['Middagsplan','meals']].map(([title, tab]) => {
+    const card = button('', () => app.go(tab));
+    const summary = node('span');
+    card.append(node('strong', title), summary);
+    bottom.append(card);
+    return summary;
+  });
+  function updateSummaries() {
+    const day = today(), week = monday(day);
+    const shopping = app.householdState().shopping.filter(item => !item.done).length;
+    const tasks = state.tasks.filter(task => forWeek(task, week));
+    const finished = tasks.filter(task => doneIn(task, week)).length;
+    summaries[0].textContent = shopping ? shopping + ' igjen på lista' : 'Ingen varer på lista';
+    summaries[1].textContent = tasks.length ? finished + ' av ' + tasks.length + ' ferdige denne uka' : 'Ingen oppgaver denne uka';
+    summaries[2].textContent = state.meals[day] || 'Ingen middag planlagt i dag';
+  }
+  updateSummaries();
+  window.addEventListener('skylit-household', updateSummaries);
+  setInterval(updateSummaries, 60000);
   window.addEventListener('skylit-tab', event => {
+    if (event.detail === 'overview') updateSummaries();
     if (event.detail === 'chores') { selected = today(); renderChores(); }
     if (event.detail === 'meals') { mealWeek = monday(today()); renderMeals(); }
   });

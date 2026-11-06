@@ -66,13 +66,49 @@
     if(native&&native.photoExclude){const excluded=new Set(state.excluded);for(const photo of state.photos){const id=frame.photoId(photo);if(excluded.has(id)||curated[id])curated[id]=Object.assign({},choice(photo),{hidden:excluded.has(id)});}}
     saveChoices();render();if(window.SkylitLibrary)window.SkylitLibrary.receive(state,curated);if(window.SkylitPlayer)window.SkylitPlayer.receive(state,curated);window.dispatchEvent(new Event('skylit-service-status'));}
   function refresh(){if(!native||!native.photoStatus)return;try{receive(native.photoStatus(),true);}catch(e){$('photo-mail-status').textContent='Could not read the photo status from this frame.';}}
-  function renderOverviewPhotos(){
-    const items=source==='email'?frame.overviewPictures(state.photos,curated,preferences()):[];
-    const button=$('overview-photos'),host=$('overview-photo-stack');
-    button.hidden=!items.length;
-    document.querySelector('.overview-grid').classList.toggle('with-photos',items.length>0);
-    window.SkylitUI.photos.stack({pictures:items.map((photo,i)=>({id:frame.photoId(photo),url:photo.url,angle:playback.angle(i)}))});
+  const overviewFrames = [new Image(), new Image()];
+  let overviewItems = [], overviewIndex = 0, overviewLayer = 0, overviewRequest = 0;
+  const overviewHost = $('overview-photo-stack');
+  overviewFrames.forEach(image => { image.alt = ''; overviewHost.append(image); });
+  $('overview-photos').setAttribute('aria-label','Åpne bilder');
+  function showOverviewPhoto(index) {
+    const item = overviewItems[index];
+    if (!item) return;
+    const next = 1 - overviewLayer, image = overviewFrames[next], request = ++overviewRequest;
+    const reveal = () => {
+      if (request !== overviewRequest || !image.naturalWidth) return;
+      image.onload = null;
+      overviewFrames[overviewLayer].classList.remove('showing');
+      image.classList.add('showing');
+      overviewIndex = index;
+      overviewLayer = next;
+    };
+    image.onload = reveal;
+    image.src = item.url;
+    if (image.complete && image.naturalWidth) reveal();
   }
+  function renderOverviewPhotos() {
+    const items = frame.pictures(state.photos, curated);
+    const prefs = preferences();
+    if (prefs.preferFavourites) items.sort((a,b) => Number(Boolean((curated[frame.photoId(b)] || {}).favourite)) - Number(Boolean((curated[frame.photoId(a)] || {}).favourite)));
+    const current = overviewItems[overviewIndex];
+    overviewItems = items;
+    $('overview-photos').hidden = !items.length;
+    document.querySelector('.overview-grid').classList.toggle('with-photos',items.length > 0);
+    if (!items.length) {
+      overviewRequest++;
+      overviewFrames.forEach(image => { image.classList.remove('showing'); image.removeAttribute('src'); });
+      return;
+    }
+    const previous = current ? items.findIndex(item => item.url === current.url) : -1;
+    if (previous >= 0) overviewIndex = previous;
+    else showOverviewPhoto(0);
+  }
+  setInterval(() => {
+    if (!document.hidden && $('overview').classList.contains('active') && overviewItems.length > 1) {
+      showOverviewPhoto((overviewIndex + 1) % overviewItems.length);
+    }
+  }, 120000);
   function render(){
     const album=source==='album';
     $('photo-source').value=source;

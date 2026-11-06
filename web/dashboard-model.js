@@ -1,6 +1,6 @@
 'use strict';
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.SkylitDashboardModel=api;})(typeof window!=='undefined'?window:globalThis,function(){
-  const columns=12,rows=12;
+  const columns=12,rows=15;
   const styles={clock:['classic','analog','stacked','digital'],photos:['prints','mosaic','spotlight'],weather:['landscape','minimal','sky']};
   function setStyle(item,value){if(value===styles[item.type]?.[0]||!styles[item.type]?.includes(value))delete item.style;else item.style=value;return item;}
   const catalog=[
@@ -21,8 +21,8 @@
     if(name==='week')return {version:1,modules:[
       {type:'clock',x:0,y:0,w:12,h:3},
       {type:'plans',x:0,y:3,w:9,h:6},
-      {type:'note',x:0,y:9,w:4,h:3},
-      {type:'photos',x:4,y:9,w:5,h:3},
+      {type:'note',x:0,y:9,w:9,h:3},
+      {type:'photos',x:0,y:12,w:12,h:3},
       {type:'ruter',x:9,y:3,w:3,h:5},
       {type:'weather',x:9,y:8,w:3,h:4},
     ]};
