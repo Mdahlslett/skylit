@@ -22,6 +22,8 @@ import java.io.IOException;
 
 /** A local dashboard plus isolated, unprivileged Google service and YouTube web views. */
 public class MainActivity extends Activity {
+  private static final int CALENDAR_PERMISSION_REQUEST = 74;
+  private static final String READ_CALENDAR = android.Manifest.permission.READ_CALENDAR;
   private static final String TAG="Skylit";
   private static final String LOCAL="https://appassets.androidplatform.net/index.html";
   private final Handler handler=new Handler(Looper.getMainLooper());
@@ -123,6 +125,25 @@ public class MainActivity extends Activity {
     @JavascriptInterface public void updateInstall(){runOnUiThread(()->updates.install(MainActivity.this,false));}
     @JavascriptInterface public void updatePermission(){runOnUiThread(()->updates.permission(MainActivity.this));}
     @JavascriptInterface public void updateHeartbeat(boolean ready){runOnUiThread(()->{updates.activity((ready||idlePhotos||quietOpen)&&foreground&&(remote==null||idlePhotos&&remotePhotos)&&(!localPhotosOpen||idlePhotos));updates.install(MainActivity.this,true);});}
+    @JavascriptInterface public boolean deviceCalendarAllowed() {
+      return checkSelfPermission(READ_CALENDAR) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+    }
+    @JavascriptInterface public void requestDeviceCalendarAccess() {
+      runOnUiThread(() -> {
+        if (!deviceCalendarAllowed()) requestPermissions(new String[]{READ_CALENDAR}, CALENDAR_PERMISSION_REQUEST);
+      });
+    }
+    @JavascriptInterface public String deviceCalendarList() {
+      if (!deviceCalendarAllowed()) return "[]";
+      try { return DeviceCalendars.sources(getContentResolver()).toString(); }
+      catch (Exception e) { return "[]"; }
+    }
+    @JavascriptInterface public String deviceCalendarEvents(long begin, long end) {
+      if (!deviceCalendarAllowed()) return "[]";
+      try { return DeviceCalendars.events(getContentResolver(), begin, end).toString(); }
+      catch (Exception e) { return "[]"; }
+    }
+
     @JavascriptInterface public String calendarList(){return calendars.snapshot();}
     @JavascriptInterface public String calendarAdd(String name,String color,String url){return calendars.add(name,color,url);}
     @JavascriptInterface public boolean calendarMetadata(String id,String name,String color){return calendars.metadata(id,name,color);}
@@ -282,6 +303,13 @@ public class MainActivity extends Activity {
     return super.dispatchTouchEvent(e);
   }
   private void pauseMomo(boolean paused){if(dashboard!=null)dashboard.evaluateJavascript("window.Momo&&window.Momo.setPaused("+paused+")",null);}
+  @Override public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+    super.onRequestPermissionsResult(requestCode, permissions, results);
+    if (requestCode == CALENDAR_PERMISSION_REQUEST && dashboard != null) {
+      dashboard.evaluateJavascript("window.SkylitCalendar&&window.SkylitCalendar.refresh()", null);
+    }
+  }
+
   @Override protected void onResume(){super.onResume();foreground=true;if(updates!=null)updates.touched();pauseMomo(remote!=null||localPhotosOpen||quietOpen);if(photoMail!=null)photoMail.maybeSync();resetIdle();hideBars();}
   @Override protected void onPause(){foreground=false;pauseMomo(true);handler.removeCallbacks(idleTask);handler.removeCallbacks(exitTask);if(updates!=null)updates.activity(false);super.onPause();}
   @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);WebView.setWebContentsDebuggingEnabled(intent.getBooleanExtra("debug",false));if(remote!=null)closeRemote();if(localPhotosOpen&&dashboard!=null)dashboard.evaluateJavascript("window.SkylitPhotos&&window.SkylitPhotos.close()",null);}

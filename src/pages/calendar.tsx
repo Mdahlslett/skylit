@@ -4,6 +4,7 @@ type CalendarSource = {
   name: string;
   color: string;
   fetchedAt?: number;
+  device?: boolean;
 };
 type SourceActions = {
   onVisible: (id: string, value: boolean) => void;
@@ -42,7 +43,7 @@ export function CalendarSources({
           source={s}
           shown={!hidden.includes(s.id)}
           note={
-            errors.get(s.id) ||
+            s.device ? "Synced by DAVx⁵" : errors.get(s.id) ||
             (busy.has(s.id)
               ? "Checking calendar…"
               : s.fetchedAt
@@ -116,7 +117,7 @@ function Source({
           </form>
         )}
       </div>
-      <div className="cal-source-actions">
+      {!s.device && <div className="cal-source-actions">
         <Button
           variant="secondary"
           aria-label={"Edit " + s.name}
@@ -141,7 +142,7 @@ function Source({
             Cancel
           </Button>
         )}
-      </div>
+      </div>}
     </div>
   );
 }
