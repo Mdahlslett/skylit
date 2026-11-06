@@ -1,0 +1,47 @@
+name: Skylit WebView 74 test APK
+on:
+  push:
+    branches: ['codex/webview74-test']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: npm ci --ignore-scripts
+      - name: Prepare Android tools and temporary signing key
+        run: |
+          sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+          mkdir -p .local
+          keytool -genkeypair -keystore .local/test.jks -storepass android -keypass android -alias skylit-test -keyalg RSA -keysize 2048 -validity 365 -dname 'CN=Skylit WebView 74 Test'
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          sdk = Path(os.environ['ANDROID_HOME'])
+          Path('.local/build.json').write_text(json.dumps({
+              'java': os.environ['JAVA_HOME'],
+              'build_tools': str(sdk / 'build-tools/34.0.0'),
+              'android_jar': str(sdk / 'platforms/android-34/android.jar'),
+              'signing_key': str(Path('.local/test.jks').resolve()),
+          }))
+          PY
+      - name: Build and verify APK
+        run: |
+          python3 scripts/build.py --webview74
+          python3 scripts/check_public.py --apk dist/skylit-webview74.apk
+          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging dist/skylit-webview74.apk | grep -E "^package: name='com.wesbos.homehq.webview74'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skylit-webview74
+          path: dist/skylit-webview74.apk
+          if-no-files-found: error
