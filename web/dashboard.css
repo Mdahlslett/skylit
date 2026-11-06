@@ -373,3 +373,20 @@
 #overview [data-module=ruter] .ruter-minutes {font-size:19px;font-variant-numeric:tabular-nums}
 #overview [data-module=ruter] .ruter-scheduled {display:block;color:#c7ced9;font-size:10px}
 #overview [data-module=ruter] .ruter-status {margin:5px 3px;color:#c7ced9;font-size:11px}
+
+/* Ukeplan på oversikten */
+#overview .sk-week{display:none}
+#overview [data-week=true] #overview-events{display:none}
+#overview [data-week=true] .sk-week{display:flex;flex-direction:column;flex:1;min-height:0;overflow:auto}
+#overview .sk-week-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:4px 0 10px}
+#overview .sk-week-legend{display:flex;flex-wrap:wrap;gap:6px;font-size:12px}
+#overview .sk-week-legend span{padding:2px 5px;border-left:3px solid var(--line)}
+#overview .sk-week-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));flex:1;border-top:1px solid var(--line)}
+#overview .sk-week-day{min-width:0;padding:5px;border-right:1px solid var(--line)}
+#overview .sk-week-day:last-child{border-right:0}
+#overview .sk-week-day[aria-current=date]{background:var(--surface,var(--bg));box-shadow:inset 0 3px 0 var(--accent)}
+#overview .sk-week-date,#overview .sk-week-event{display:block;width:100%;text-align:left;border-radius:5px}
+#overview .sk-week-date{padding:7px 3px;margin-bottom:5px;text-align:center;font-size:14px;font-weight:700}
+#overview .sk-week-event{margin:0 0 5px;padding:5px;border:1px solid var(--line);border-left-width:4px;background:var(--bg);font-size:14px;line-height:1.25;overflow-wrap:break-word}
+#overview .sk-week-event small{display:block;font-size:11px;margin-bottom:3px}
+@media(max-width:620px){#overview .sk-week-days{grid-template-columns:repeat(2,minmax(0,1fr))}#overview .sk-week-day{min-height:60px;border-bottom:1px solid var(--line)}}

@@ -18,6 +18,12 @@
   const definition=type=>catalog.find(item=>item.type===type);
   const copy=layout=>({version:1,modules:layout.modules.map(item=>({...item}))});
   function preset(name='balanced'){
+    if(name==='week')return {version:1,modules:[
+      {type:'clock',x:0,y:0,w:12,h:3},
+      {type:'plans',x:0,y:3,w:9,h:9},
+      {type:'ruter',x:9,y:3,w:3,h:5},
+      {type:'weather',x:9,y:8,w:3,h:4},
+    ]};
     const positions=name==='photos'?[[0,0,6,4],[0,4,6,8],[6,0,6,6],[6,6,6,6]]:name==='agenda'?[[0,0,4,4],[0,4,4,8],[4,0,8,4],[4,4,8,8]]:[[0,0,6,4],[0,4,6,8],[6,0,6,4],[6,4,6,8]];
     return {version:1,modules:['clock','weather','photos','plans'].map((type,i)=>({type,x:positions[i][0],y:positions[i][1],w:positions[i][2],h:positions[i][3]}))};
   }

@@ -6,7 +6,7 @@
   const legacy=()=>{try{return SkylitFrameModel.preferences(JSON.parse(localStorage.getItem('skylit.frame')||'{}'));}catch(_){return {};}};
   let raw;try{raw=JSON.parse(localStorage.getItem(key));}catch(_){}
   let saved=model.normalize(raw,legacy());
-  if(!raw)saved=model.add(saved,'ruter').layout;
+  if(!raw)saved=model.preset('week');
   let draft=model.copy(saved),selected=null,drag=null,ignoreClick=false,scrollFrame=0,moveFrame=0,pendingMove=null,saveError=false;
   const wrappers=new Map(),originals=new Map([
     ['clock',document.querySelector('.overview-heading')],['weather',document.querySelector('.overview-weather')],
@@ -142,7 +142,7 @@
   setInterval(refreshRuter,15000);
 
   function applyLayout(){
-    for(const [type,n] of wrappers){const item=saved.modules.find(item=>item.type===type);n.hidden=!item;if(item)position(n,item);}
+    for(const [type,n] of wrappers){const item=saved.modules.find(item=>item.type===type);n.hidden=!item;if(item)position(n,item);if(type==='plans')n.dataset.week=String(!!item&&item.w>=7);}
     // Match reading and keyboard order to the visible arrangement.
     saved.modules.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(item=>grid.append(wrappers.get(item.type)));
     empty.hidden=!!saved.modules.length;paintClock();sizeModules();renderUtilities();refreshRuter();
@@ -209,7 +209,7 @@
   clockSample=$('dashboard-clock-preview');sampleVisual=SkylitClock.create(document);clockSample.classList.add('clock-frame');const sampleTime=node('div','clock-sample-time clock-time'),sampleDate=node('p','clock-sample-date clock-date');sampleTime.append(node('span','clock-sample-digits'),node('span','clock-sample-period'));observer.observe(clockSample);sampleTime.setAttribute('aria-hidden','true');sampleDate.setAttribute('aria-hidden','true');clockSample.append(sampleVisual.root,sampleTime,sampleDate);
   stylePicker.onchange=()=>{const next=model.change(draft,'clock',{style:stylePicker.value});if(next){draft=next;preset.value='custom';paintPositions();message('Clock style changed. Saved on this frame.');}};
   const start=$('dashboard-starting-layout'),presetLabel=document.querySelector('label[for=overview-preset]'),preset=$('overview-preset');
-  presetLabel.textContent='Startoppsett';start.append(presetLabel,preset);const custom=node('option',null,'Tilpasset');custom.value='custom';custom.disabled=true;preset.prepend(custom);
+  presetLabel.textContent='Startoppsett';start.append(presetLabel,preset);const custom=node('option',null,'Tilpasset');custom.value='custom';custom.disabled=true;preset.prepend(custom);const week=node('option',null,'Ukeplan');week.value='week';preset.append(week);
   preset.value='custom';preset.onchange=()=>{const style=draft.modules.find(item=>item.type==='clock')?.style||'classic';draft=model.change(model.preset(preset.value),'clock',{style});selected=null;paintEditor();message('Starting layout selected. Saved on this frame.');};
   // The old optional excerpt migrates to a real Note module; configuration now lives here.
   $('household-excerpt').closest('label').remove();
