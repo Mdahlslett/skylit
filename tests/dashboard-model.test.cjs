@@ -53,13 +53,13 @@ test('widget swaps exchange complete slots while preserving style and size const
  const layout=model.preset();layout.modules[0].style='analog';const before=JSON.stringify(layout);
  const swapped=model.swap(layout,'clock','weather');sound(swapped);assert.equal(swapped.modules[0].h,8);assert.equal(swapped.modules[1].h,4);assert.equal(swapped.modules[0].style,'analog');assert.equal(JSON.stringify(layout),before);
  assert.deepEqual(model.swap(swapped,'clock','weather'),layout);
- const small={version:1,modules:[{type:'clock',x:0,y:0,w:3,h:3},{type:'weather',x:3,y:0,w:3,h:4}]};assert.equal(model.swap(small,'clock','weather'),null);assert.equal(model.swap(layout,'clock','missing'),null);
+ const small={version:1,modules:[{type:'clock',x:0,y:0,w:3,h:3},{type:'ruter',x:3,y:0,w:3,h:4}]};assert.equal(model.swap(small,'clock','ruter'),null);assert.equal(model.swap(layout,'clock','missing'),null);
 });
 
 test('palette placements fit a three-row gap and reject a fully occupied grid',()=>{
  const l=model.preset();l.modules.find(m=>m.type==='weather').y=7;l.modules.find(m=>m.type==='weather').h=5;l.modules.find(m=>m.type==='plans').y=7;l.modules.find(m=>m.type==='plans').h=5;
  for(const type of ['timers','countdowns']){const slot=model.placement(l,type,{x:6,y:5.5});assert.equal(slot.h,3);assert.equal(slot.y,4);const result=model.add(l,type,slot);assert.equal(result.added,true);sound(result.layout);}
- assert.equal(model.placement(model.preset('week'),'timers',{x:6,y:6}),null);assert.equal(model.placement(l,'clock',{x:6,y:6}),null);
+ assert.equal(model.placement(model.preset(),'timers',{x:6,y:6}),null);assert.equal(model.placement(l,'clock',{x:6,y:6}),null);
 });
 test('photo and weather styles persist through normalize, resize, swap and packing without accepting unknown values',()=>{
  for(const type of ['photos','weather'])for(const style of model.styles[type]){
@@ -68,12 +68,9 @@ test('photo and weather styles persist through normalize, resize, swap and packi
  assert.equal(model.change(model.preset(),'photos',{style:'analog'}),null);const raw=model.preset();raw.modules[2].style='<script>';assert.equal(model.normalize(raw).modules[2].style,undefined);
 });
 
-test('week view stacks a full-width photo under the note without overlaps',()=>{
+test('week view fills its bottom row with the note, a wide photo and weather',()=>{
   const layout=model.preset('week');
   sound(layout);
-  const note=layout.modules.find(item=>item.type==='note');
-  const photo=layout.modules.find(item=>item.type==='photos');
-  assert.equal(photo.y,note.y+note.h);
-  assert.equal(photo.x,0);
-  assert.equal(photo.w,model.columns);
+  const bottom=layout.modules.filter(item=>item.y===9).sort((a,b)=>a.x-b.x);
+  assert.deepEqual(bottom.map(({type,x,w})=>[type,x,w]),[['note',0,3],['photos',3,6],['weather',9,3]]);
 });

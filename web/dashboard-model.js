@@ -1,12 +1,12 @@
 'use strict';
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.SkylitDashboardModel=api;})(typeof window!=='undefined'?window:globalThis,function(){
-  const columns=12,rows=15;
+  const columns=12,rows=12;
   const styles={clock:['classic','analog','stacked','digital'],photos:['prints','mosaic','spotlight'],weather:['landscape','minimal','sky']};
   function setStyle(item,value){if(value===styles[item.type]?.[0]||!styles[item.type]?.includes(value))delete item.style;else item.style=value;return item;}
   const catalog=[
     {type:'ruter',name:'Ruter · Hval',description:'Neste bussavganger fra Hval i Asker.',minW:3,minH:4},
     {type:'clock',name:'Klokke og dato',description:'Tid og dato for valgt sted.',minW:3,minH:3},
-    {type:'weather',name:'Vær',description:'Været akkurat nå.',minW:3,minH:4},
+    {type:'weather',name:'Vær',description:'Været akkurat nå.',minW:3,minH:3},
     {type:'photos',name:'Bilder',description:'Lokale bilder. Trykk for å åpne Bilder.',minW:3,minH:3},
     {type:'plans',name:'Kommende avtaler',description:'Kommende avtaler fra og med i dag.',minW:3,minH:4},
     {type:'forecast',name:'Timevarsel',description:'Værvarsel for de neste timene.',minW:3,minH:4},
@@ -21,10 +21,10 @@
     if(name==='week')return {version:1,modules:[
       {type:'clock',x:0,y:0,w:12,h:3},
       {type:'plans',x:0,y:3,w:9,h:6},
-      {type:'note',x:0,y:9,w:9,h:3},
-      {type:'photos',x:0,y:12,w:12,h:3},
-      {type:'ruter',x:9,y:3,w:3,h:5},
-      {type:'weather',x:9,y:8,w:3,h:4},
+      {type:'note',x:0,y:9,w:3,h:3},
+      {type:'photos',x:3,y:9,w:6,h:3},
+      {type:'ruter',x:9,y:3,w:3,h:6},
+      {type:'weather',x:9,y:9,w:3,h:3},
     ]};
     const positions=name==='photos'?[[0,0,6,4],[0,4,6,8],[6,0,6,6],[6,6,6,6]]:name==='agenda'?[[0,0,4,4],[0,4,4,8],[4,0,8,4],[4,4,8,8]]:[[0,0,6,4],[0,4,6,8],[6,0,6,4],[6,4,6,8]];
     return {version:1,modules:['clock','weather','photos','plans'].map((type,i)=>({type,x:positions[i][0],y:positions[i][1],w:positions[i][2],h:positions[i][3]}))};
