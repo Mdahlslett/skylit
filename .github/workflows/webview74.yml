@@ -18,11 +18,14 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - run: npm ci --ignore-scripts
       - name: Prepare Android tools and temporary signing key
         run: |
-          sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          if [[ ! -x "$ANDROID_HOME/build-tools/34.0.0/aapt2" || ! -f "$ANDROID_HOME/platforms/android-34/android.jar" ]]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-34' 'build-tools;34.0.0'
+          fi
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
           mkdir -p .local
           keytool -genkeypair -keystore .local/test.jks -storepass android -keypass android -alias skylit-test -keyalg RSA -keysize 2048 -validity 365 -dname 'CN=Skylit WebView 74 Test'
           python3 - <<'PY'
