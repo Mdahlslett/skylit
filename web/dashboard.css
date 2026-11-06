@@ -390,3 +390,17 @@
 #overview .sk-week-event{margin:0 0 5px;padding:5px;border:1px solid var(--line);border-left-width:4px;background:var(--bg);font-size:14px;line-height:1.25;overflow-wrap:break-word}
 #overview .sk-week-event small{display:block;font-size:11px;margin-bottom:3px}
 @media(max-width:620px){#overview .sk-week-days{grid-template-columns:repeat(2,minmax(0,1fr))}#overview .sk-week-day{min-height:60px;border-bottom:1px solid var(--line)}}
+
+/* Keep edit targets readable on the frame even while the preview loads. */
+@supports not (inset: 0) {
+  .dashboard-workbench .dashboard-editor-tile {
+    border-color: var(--line);
+  }
+  .dashboard-workbench .dashboard-move {
+    color: var(--ink);
+    text-shadow: 0 1px 2px var(--bg), 0 0 5px var(--bg);
+  }
+  .dashboard-workbench .dashboard-editor-tile.selected .dashboard-resize {
+    opacity: 1;
+  }
+}
