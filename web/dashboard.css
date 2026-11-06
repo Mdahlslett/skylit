@@ -314,3 +314,62 @@
 
 /* Gesture handles must override the shared button manipulation policy. */
 .dashboard-workbench .dashboard-move,.dashboard-workbench .dashboard-resize{touch-action:none}
+
+/* Avgangstavle for Hval */
+#overview .dashboard-module[data-module=ruter] {
+  background:#171a20;
+  color:#f7f8fa;
+  border-color:#353b46;
+  padding:0;
+}
+#overview [data-module=ruter] .section-title {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#22262e;
+  padding:8px 12px;
+  margin:0;
+}
+#overview [data-module=ruter] .ruter-title {min-width:0}
+#overview [data-module=ruter] .ruter-title h2 {
+  display:inline;
+  margin:0;
+  font:700 22px/1.1 system-ui,sans-serif;
+  color:inherit;
+}
+#overview [data-module=ruter] .ruter-kicker {
+  margin:0 0 2px;
+  font:650 10px/1.2 system-ui,sans-serif;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:#c7ced9;
+}
+#overview [data-module=ruter] .ruter-place {margin-left:5px;font-size:12px;color:#c7ced9}
+#overview [data-module=ruter] .ruter-logo {
+  width:58px;
+  height:auto;
+  padding:6px;
+  background:#fff;
+  border-radius:5px;
+  box-sizing:content-box;
+  flex-shrink:0;
+}
+#overview [data-module=ruter] .dashboard-module-content {padding:0 10px;overflow:auto}
+#overview [data-module=ruter] .ruter-departures {width:100%;border-collapse:collapse;text-align:left}
+#overview [data-module=ruter] th {padding:5px 3px;color:#c7ced9;font-size:11px;font-weight:600}
+#overview [data-module=ruter] td {padding:4px 3px;border-top:1px solid #353b46;font-size:14px;line-height:1.2;overflow-wrap:break-word}
+#overview [data-module=ruter] th:last-child,
+#overview [data-module=ruter] td:last-child {text-align:right;white-space:nowrap}
+#overview [data-module=ruter] .ruter-line {
+  display:inline-block;
+  min-width:34px;
+  padding:3px 4px;
+  border-radius:4px;
+  background:#08783e;
+  color:#fff;
+  font-weight:700;
+  text-align:center;
+}
+#overview [data-module=ruter] .ruter-minutes {font-size:19px;font-variant-numeric:tabular-nums}
+#overview [data-module=ruter] .ruter-scheduled {display:block;color:#c7ced9;font-size:10px}
+#overview [data-module=ruter] .ruter-status {margin:5px 3px;color:#c7ced9;font-size:11px}

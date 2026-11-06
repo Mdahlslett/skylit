@@ -82,20 +82,48 @@
   const empty=node('div','dashboard-empty');empty.append(node('h2',null,'Dashbordet er tomt'));const configure=node('button','secondary','Velg moduler');configure.onclick=()=>app.openSettings('dashboard','overview');empty.append(configure);grid.append(empty);
   function position(n,item){n.dataset.widgetStyle=item.style||model.styles[item.type]?.[0]||'';n.style.gridColumn=(item.x+1)+' / span '+item.w;n.style.gridRow=(item.y+1)+' / span '+item.h;}
   const ruterCard=wrappers.get('ruter'),ruterContent=ruterCard.querySelector('.dashboard-module-content');
+  const ruterHeader=ruterCard.querySelector('.section-title');
+  const ruterTitle=node('div','ruter-title');
+  ruterTitle.append(node('p','ruter-kicker','Neste avganger'),node('h2',null,'Hval'),node('span','ruter-place','Asker'));
+  const ruterLogo=node('img','ruter-logo');
+  ruterLogo.src='ruter-logo.svg';
+  ruterLogo.alt='Ruter';
+  ruterHeader.replaceChildren(ruterTitle,ruterLogo);
+  const departureTable=node('table','ruter-departures');
+  departureTable.setAttribute('aria-label','Bussavganger fra Hval');
+  const columnLabels=departureTable.createTHead().insertRow();
+  for(const label of ['Linje','Destinasjon','Avgang']){
+    const cell=node('th',null,label);
+    cell.scope='col';
+    columnLabels.append(cell);
+  }
+  const departureRows=departureTable.createTBody();
+  const ruterStatus=node('p','ruter-status');
+  ruterStatus.setAttribute('role','status');
+  ruterContent.replaceChildren(departureTable,ruterStatus);
   let departures=[],ruterUpdated=0,ruterRequest=0,ruterError=false;
   function paintRuter(){
     if(ruterCard.hidden)return;
     const now=Date.now();
     const current=departures.filter(item=>Date.parse(item.time)>=now).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time)).slice(0,3);
     const rows=current.map(item=>{
-      const row=node('p','small');
+      const row=node('tr');
+      const line=row.insertCell();
+      line.append(node('span','ruter-line',item.line));
+      row.insertCell().textContent=item.destination;
+      const time=row.insertCell();
       const minutes=Math.ceil((Date.parse(item.time)-now)/60000);
-      row.append(node('strong',null,item.line+' '+item.destination),document.createTextNode(' · '+(minutes<=1?'nå':minutes+' min')+(item.realtime?'':' (rutetid)')));
+      time.append(node('strong','ruter-minutes',minutes<=1?'Nå':String(minutes)));
+      if(minutes>1)time.append(document.createTextNode(' min'));
+      if(!item.realtime)time.append(node('small','ruter-scheduled','Rutetid'));
       return row;
     });
-    if(!rows.length)rows.push(node('p','small subtle',ruterError?'Kunne ikke hente avganger.':ruterUpdated?'Ingen kommende avganger.':'Henter avganger …'));
-    else if(ruterError)rows.push(node('p','tiny subtle','Viser sist hentede avganger.'));
-    ruterContent.replaceChildren(...rows);
+    departureRows.replaceChildren(...rows);
+    departureTable.hidden=!rows.length;
+    const status=rows.length
+      ? (ruterError?'Viser sist hentede avganger · Entur':'Data fra Entur')
+      : (ruterError?'Kunne ikke hente avganger.':ruterUpdated?'Ingen kommende avganger.':'Henter avganger …');
+    if(ruterStatus.textContent!==status)ruterStatus.textContent=status;
   }
   function refreshRuter(){
     if(ruterCard.hidden||app.status().tab!=='overview'||document.hidden)return;
