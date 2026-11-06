@@ -5,7 +5,9 @@ import argparse, hashlib, json, os, re, shutil, subprocess, zipfile
 from assets import stage_assets
 from frontend import build_frontend
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument("--personal",action="store_true",help="Embed ignored local configuration; NEVER distribute this APK")
+mode=parser.add_mutually_exclusive_group()
+mode.add_argument("--personal",action="store_true",help="Embed ignored local configuration; NEVER distribute this APK")
+mode.add_argument("--webview74",action="store_true",help="Build a separate Chromium 74 test APK")
 args=parser.parse_args()
 root=Path(__file__).resolve().parents[1]
 build_frontend(root)
@@ -24,6 +26,20 @@ build=root/'build'; output=root/'dist'; app=root/'android'
 if build.exists(): shutil.rmtree(build)
 for path in [build/'gen',build/'classes',build/'dex',build/'assets',output]: path.mkdir(parents=True,exist_ok=True)
 stage_assets(root/"web",build/"assets",personal=args.personal)
+manifest=app/'AndroidManifest.xml'
+manifest_options=[]
+if args.webview74:
+    subprocess.run(['node','scripts/compat_webview74.mjs',str(build/'assets')],cwd=root,check=True)
+    test_manifest=build/'AndroidManifest.xml'
+    test_manifest.write_text(
+        manifest.read_text(encoding='utf-8')
+        .replace('android:name=".', 'android:name="com.wesbos.homehq.')
+        .replace('android:label="Skylit"', 'android:label="Skylit WebView 74"')
+        .replace('        <category android:name="android.intent.category.HOME" />\n', ''),
+        encoding='utf-8',
+    )
+    manifest=test_manifest
+    manifest_options=['--rename-manifest-package','com.wesbos.homehq.webview74']
 for artifact in mail_jars:
     with zipfile.ZipFile(artifact) as archive:
         for notice in ('LICENSE.md','NOTICE.md'):
@@ -32,7 +48,7 @@ for artifact in mail_jars:
 env=dict(os.environ,JAVA_HOME=str(java),PATH=str(java/'bin')+':'+os.environ['PATH'])
 def run(*args):subprocess.run([str(a) for a in args],cwd=root,env=env,check=True)
 run(bt/'aapt2','compile','--dir',app/'res','-o',build/'res.zip')
-run(bt/'aapt2','link','-o',build/'base.apk','-I',jar,'--manifest',app/'AndroidManifest.xml','-A',build/'assets',build/'res.zip','--java',build/'gen','--min-sdk-version','23','--target-sdk-version','32','--version-code',str(version_code),'--version-name',version_name)
+run(bt/'aapt2','link','-o',build/'base.apk','-I',jar,'--manifest',manifest,*manifest_options,'-A',build/'assets',build/'res.zip','--java',build/'gen','--min-sdk-version','23','--target-sdk-version','32','--version-code',str(version_code),'--version-name',version_name)
 sources=list((app/'src').rglob('*.java'))+list((build/'gen').rglob('*.java'))
 run(java/'bin/javac','-source','8','-target','8','-classpath',os.pathsep.join(map(str,(jar,*mail_jars))),'-d',build/'classes',*sources)
 run(bt/'d8','--min-api','23','--lib',jar,'--output',build/'dex',*list((build/'classes').rglob('*.class')),*mail_jars)
@@ -40,10 +56,11 @@ run('/usr/bin/zip','-qj',build/'base.apk',build/'dex/classes.dex')
 run(bt/'zipalign','-f','4',build/'base.apk',build/'aligned.apk')
 # This development signing key retains upgrade compatibility with the first install.
 env['SKYLIT_KEY_PASS']=os.environ.get('SKYLIT_KEY_PASS') or config.get('key_password','android')
-run(bt/'apksigner','sign','--ks',key,'--ks-pass','env:SKYLIT_KEY_PASS','--key-pass','env:SKYLIT_KEY_PASS','--out',output/('skylit-personal.apk' if args.personal else 'skylit.apk'),build/'aligned.apk')
-run(bt/'apksigner','verify','--verbose',output/('skylit-personal.apk' if args.personal else 'skylit.apk'))
-print('Built:',output/('skylit-personal.apk' if args.personal else 'skylit.apk'))
+apk_name='skylit-webview74.apk' if args.webview74 else 'skylit-personal.apk' if args.personal else 'skylit.apk'
+run(bt/'apksigner','sign','--ks',key,'--ks-pass','env:SKYLIT_KEY_PASS','--key-pass','env:SKYLIT_KEY_PASS','--out',output/apk_name,build/'aligned.apk')
+run(bt/'apksigner','verify','--verbose',output/apk_name)
+print('Built:',output/apk_name)
 
-if not args.personal:
+if not (args.personal or args.webview74):
     apk=output/'skylit.apk'
     (output/'update.json').write_text(json.dumps({'package':'com.wesbos.homehq','versionCode':version_code,'versionName':version_name,'minSdk':23,'asset':f'skylit-{version_name}.apk','sourceCommit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),'sourceDirty':bool(subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip()),'sha256':hashlib.sha256(apk.read_bytes()).hexdigest()},indent=2)+'\n')
