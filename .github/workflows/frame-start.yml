@@ -24,7 +24,7 @@ jobs:
           fi
           mkdir -p out/classes out/dex
           javac -source 8 -target 8 -classpath "$api" -d out/classes android-start/StartActivity.java
-          "$bt/d8" --min-api 23 --lib "$api" --output out/dex out/classes/no/skylit/framestart/StartActivity.class
+          "$bt/d8" --min-api 23 --lib "$api" --output out/dex out/classes/no/skylit/framestart/v2/StartActivity.class
           "$bt/aapt2" link -I "$api" --manifest android-start/AndroidManifest.xml -o out/unsigned.apk
           (cd out/dex && zip -q -j ../unsigned.apk classes.dex)
           "$bt/zipalign" -f 4 out/unsigned.apk out/aligned.apk

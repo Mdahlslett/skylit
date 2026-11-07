@@ -1,4 +1,4 @@
-package no.skylit.framestart;
+package no.skylit.framestart.v2;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -47,6 +47,17 @@ public final class StartActivity extends Activity {
         row.addView(button, size);
         button.setOnClickListener(view -> {
             Intent intent = Intent.makeMainActivity(new ComponentName(packageName, activity));
+            if ("Skylit".equals(label)) {
+                long latest = -1;
+                for (android.content.pm.PackageInfo installed : getPackageManager().getInstalledPackages(0)) {
+                    if (!installed.packageName.startsWith("com.wesbos.homehq.webview74.")) continue;
+                    Intent candidate = getPackageManager().getLaunchIntentForPackage(installed.packageName);
+                    if (candidate != null && installed.lastUpdateTime > latest) {
+                        latest = installed.lastUpdateTime;
+                        intent = candidate;
+                    }
+                }
+            }
             try {
                 startActivity(intent);
             } catch (ActivityNotFoundException e) {
