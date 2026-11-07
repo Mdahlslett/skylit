@@ -228,3 +228,5 @@ main{margin:0 auto}
 .android-controls{display:flex;flex-wrap:wrap;gap:8px}
 
 #calendar .cal-grid .cal-day{height:var(--calendar-day-size,82px);min-height:0;overflow:hidden}
+
+#calendar .cal-grid{grid-auto-rows:var(--calendar-day-size,82px);align-content:start}
