@@ -74,3 +74,17 @@ test('week view fills its bottom row with the note, a wide photo and weather',()
   const bottom=layout.modules.filter(item=>item.y===9).sort((a,b)=>a.x-b.x);
   assert.deepEqual(bottom.map(({type,x,w})=>[type,x,w]),[['note',0,3],['photos',3,6],['weather',9,3]]);
 });
+
+test('family overview keeps weather and departures above a tall week with two equal side cards',()=>{
+  const layout=model.preset('family');sound(layout);
+  assert.deepEqual(model.normalize(JSON.parse(JSON.stringify(layout))),layout);
+  const find=type=>layout.modules.find(item=>item.type===type);
+  const note=find('note'),photo=find('photos'),plans=find('plans');
+  assert.deepEqual(layout.modules.filter(item=>item.y===0).map(item=>item.type),['clock','weather','ruter']);
+  assert.equal(note.x,photo.x);
+  assert.equal(note.w,photo.w);
+  assert.equal(note.h,photo.h);
+  assert.equal(photo.y,note.y+note.h);
+  assert.equal(plans.y,note.y);
+  assert.equal(plans.y+plans.h,photo.y+photo.h);
+});

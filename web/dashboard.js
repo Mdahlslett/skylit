@@ -6,7 +6,7 @@
   const legacy=()=>{try{return SkylitFrameModel.preferences(JSON.parse(localStorage.getItem('skylit.frame')||'{}'));}catch(_){return {};}};
   let raw;try{raw=JSON.parse(localStorage.getItem(key));}catch(_){}
   let saved=model.normalize(raw,legacy());
-  if(!raw)saved=model.preset('week');
+  if(!raw)saved=model.preset('family');
   let draft=model.copy(saved),selected=null,drag=null,ignoreClick=false,scrollFrame=0,moveFrame=0,pendingMove=null,saveError=false;
   const wrappers=new Map(),originals=new Map([
     ['clock',document.querySelector('.overview-heading')],['weather',document.querySelector('.overview-weather')],
@@ -162,6 +162,10 @@
 
   function applyLayout(){
     grid.classList.toggle('dashboard-fill-bottom',saved.modules.length>0);
+    const family=model.preset('family').modules;
+    grid.classList.toggle('dashboard-family',saved.modules.length===family.length&&family.every(expected=>
+      saved.modules.some(item=>item.type===expected.type&&['x','y','w','h'].every(key=>item[key]===expected[key]))
+    ));
     for(const [type,n] of wrappers){const item=saved.modules.find(item=>item.type===type);n.hidden=!item;if(item)position(n,item);if(type==='plans')n.dataset.week=String(!!item&&item.w>=7);}
     // Match reading and keyboard order to the visible arrangement.
     saved.modules.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(item=>grid.append(wrappers.get(item.type)));
@@ -194,6 +198,15 @@
       const bottom = parseFloat(getComputedStyle(page).paddingBottom) || 0;
       const height = Math.max(530,Math.floor(window.innerHeight-top-Math.max(12,bottom)));
       grid.style.setProperty('--dashboard-fill-height',height+'px');
+      if(grid.classList.contains('dashboard-family')){
+        const gap=10;
+        const topHeight=Math.max(180,Math.min(230,height*.28));
+        const square=Math.min((height-topHeight-2*gap)/2,grid.clientWidth*.28);
+        const header=height-2*square-2*gap;
+        grid.style.setProperty('--family-right-track',((square-2*gap)/3)+'px');
+        grid.style.setProperty('--family-top-track',((header-3*gap)/4)+'px');
+        grid.style.setProperty('--family-bottom-track',((square-3*gap)/4)+'px');
+      }
     }
     for(const [type,n] of wrappers){if(n.hidden)continue;const rect=n.getBoundingClientRect(),w=rect.width,h=rect.height;if(!w||!h)continue;
       n.dataset.density=w<340||h<220?'compact':'regular';n.dataset.short=String(h<280);n.dataset.narrow=String(w<340);
@@ -241,7 +254,7 @@
   clockSample=$('dashboard-clock-preview');sampleVisual=SkylitClock.create(document);clockSample.classList.add('clock-frame');const sampleTime=node('div','clock-sample-time clock-time'),sampleDate=node('p','clock-sample-date clock-date');sampleTime.append(node('span','clock-sample-digits'),node('span','clock-sample-period'));observer.observe(clockSample);sampleTime.setAttribute('aria-hidden','true');sampleDate.setAttribute('aria-hidden','true');clockSample.append(sampleVisual.root,sampleTime,sampleDate);
   stylePicker.onchange=()=>{const next=model.change(draft,'clock',{style:stylePicker.value});if(next){draft=next;preset.value='custom';paintPositions();message('Clock style changed. Saved on this frame.');}};
   const start=$('dashboard-starting-layout'),presetLabel=document.querySelector('label[for=overview-preset]'),preset=$('overview-preset');
-  presetLabel.textContent='Startoppsett';start.append(presetLabel,preset);const custom=node('option',null,'Tilpasset');custom.value='custom';custom.disabled=true;preset.prepend(custom);const week=node('option',null,'Ukeplan');week.value='week';preset.append(week);
+  presetLabel.textContent='Startoppsett';start.append(presetLabel,preset);const custom=node('option',null,'Tilpasset');custom.value='custom';custom.disabled=true;preset.prepend(custom);const week=node('option',null,'Ukeplan');week.value='week';preset.append(week);const familyPreset=node('option',null,'Familieoversikt');familyPreset.value='family';preset.append(familyPreset);
   preset.value='custom';preset.onchange=()=>{const style=draft.modules.find(item=>item.type==='clock')?.style||'classic';draft=model.change(model.preset(preset.value),'clock',{style});selected=null;paintEditor();message('Starting layout selected. Saved on this frame.');};
   // The old optional excerpt migrates to a real Note module; configuration now lives here.
   $('household-excerpt').closest('label').remove();

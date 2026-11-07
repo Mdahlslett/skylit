@@ -18,6 +18,14 @@
   const definition=type=>catalog.find(item=>item.type===type);
   const copy=layout=>({version:1,modules:layout.modules.map(item=>({...item}))});
   function preset(name='balanced'){
+    if(name==='family')return {version:1,modules:[
+      {type:'clock',x:0,y:0,w:6,h:4},
+      {type:'weather',x:6,y:0,w:3,h:4},
+      {type:'ruter',x:9,y:0,w:3,h:4},
+      {type:'plans',x:0,y:4,w:9,h:8},
+      {type:'note',x:9,y:4,w:3,h:4},
+      {type:'photos',x:9,y:8,w:3,h:4},
+    ]};
     if(name==='week')return {version:1,modules:[
       {type:'clock',x:0,y:0,w:12,h:3},
       {type:'plans',x:0,y:3,w:9,h:6},
