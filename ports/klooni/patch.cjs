@@ -245,3 +245,6 @@ edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>{
     }
 `+s.slice(end);
 });
+
+edit('core/src/dev/lonami/klooni/screens/MainMenuScreen.java',s=>s.replace('new com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle(game.skin.getFont("font_small"),Klooni.theme.highScore)','new com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle(game.skin.getFont("font_small"),com.badlogic.gdx.graphics.Color.WHITE)'));
+edit('core/src/dev/lonami/klooni/game/BaseScorer.java',s=>s.replace('com.badlogic.gdx.graphics.Color.valueOf("756b5e")','com.badlogic.gdx.graphics.Color.WHITE'));
