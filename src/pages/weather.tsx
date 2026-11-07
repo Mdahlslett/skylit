@@ -303,7 +303,7 @@ function OverviewWeatherContent({ s }: { s: WeatherState }) {
     <>
       <div className="overview-weather-scene">
         <div className="overview-weather-copy">
-          <p className="eyebrow">RIGHT NOW</p>
+          <p className="eyebrow">AKKURAT NÅ</p>
           <Icon
             className="overview-condition-icon"
             name={
