@@ -50,7 +50,7 @@ jobs:
           npm run typecheck
           python3 scripts/build.py --webview74
           python3 scripts/check_public.py --apk dist/skylit-webview74.apk
-          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging dist/skylit-webview74.apk | grep -E "^package: name='com.wesbos.homehq.webview74.huskelapp'"
+          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging dist/skylit-webview74.apk | grep -E "^package: name='com.wesbos.homehq.webview74.huskelappmeny'"
       - uses: actions/upload-artifact@v4
         with:
           name: skylit-webview74

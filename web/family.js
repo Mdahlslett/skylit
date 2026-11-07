@@ -46,7 +46,7 @@
     section.append(node('h1', title));
     const settings = document.querySelector('[data-tab="settings"]');
     const nav = button('', () => app.go(id));
-    nav.className = 'nav family-nav';
+    nav.className = 'ui-button nav family-nav';
     const icon = node('span');
     icon.dataset.icon = id;
     icon.innerHTML = app.icon(id);
