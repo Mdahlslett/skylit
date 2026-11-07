@@ -248,3 +248,9 @@ edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>{
 
 edit('core/src/dev/lonami/klooni/screens/MainMenuScreen.java',s=>s.replace('new com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle(game.skin.getFont("font_small"),Klooni.theme.highScore)','new com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle(game.skin.getFont("font_small"),com.badlogic.gdx.graphics.Color.WHITE)'));
 edit('core/src/dev/lonami/klooni/game/BaseScorer.java',s=>s.replace('com.badlogic.gdx.graphics.Color.valueOf("756b5e")','com.badlogic.gdx.graphics.Color.WHITE'));
+
+edit('core/src/dev/lonami/klooni/screens/MainMenuScreen.java',s=>s.replaceAll('Klooni.getMaxScore()','Klooni.getMaxTimeScore()').replaceAll('GameScreen.GAME_MODE_SCORE','GameScreen.GAME_MODE_TIME'));
+edit('core/src/dev/lonami/klooni/game/TimeScorer.java',s=>s.replace('return "time is up";','return "Tiden er ute";').replace('timeLeftLabel.setText(Integer.toString(timeLeft));','timeLeftLabel.setText("Tid igjen  "+(timeLeft/60)+":"+(timeLeft%60<10?"0":"")+(timeLeft%60));'));
+edit('core/src/dev/lonami/klooni/game/GameLayout.java',s=>s.replace('        if(landscape())timeLeftLabel.setBounds','        timeLeftLabel.setFontScale(.7f);\n        if(landscape())timeLeftLabel.setBounds'));
+edit('core/src/dev/lonami/klooni/screens/GameScreen.java',s=>s.replace('    public void pause() {\n        save();\n    }','    public void pause() {\n        if(!pauseMenu.isShown()&&!gameOverDone)showPauseMenu();else save();\n    }'));
+edit('core/src/dev/lonami/klooni/screens/PauseMenuStage.java',s=>s.replace('band.setMessage("Spillet er slutt");','band.setMessage(timeMode?"Tiden er ute":"Spillet er slutt");'));
