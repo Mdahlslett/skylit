@@ -507,3 +507,5 @@
 
 #shopping .shopping-card{grid-column:1;grid-row:1;order:0}#shopping .shopping-done-card{grid-column:2;grid-row:1;order:0}
 @media(max-width:800px){#shopping .shopping-done-card{grid-column:1;grid-row:2}}
+
+#shopping #shopping-add button{margin-left:10px}#shopping .shopping-item>.shopping-mark{margin-right:16px}#shopping .shopping-item{gap:0}#shopping #shopping-add{gap:0}
