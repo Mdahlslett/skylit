@@ -39,7 +39,7 @@ if args.webview74:
         encoding='utf-8',
     )
     manifest=test_manifest
-    manifest_options=['--rename-manifest-package','com.wesbos.homehq.webview74.skolelinje']
+    manifest_options=['--rename-manifest-package','com.wesbos.homehq.webview74.spill']
 for artifact in mail_jars:
     with zipfile.ZipFile(artifact) as archive:
         for notice in ('LICENSE.md','NOTICE.md'):

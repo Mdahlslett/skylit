@@ -102,6 +102,17 @@
   }
   const chores = page('chores', 'Gjøremål');
   const meals = page('meals', 'Middagsplan');
+  const games = button('', () => {
+    if (window.Skylit && Skylit.openGame) Skylit.openGame();
+    else app.notify('Spillet åpnes på rammen.');
+  });
+  games.className = 'ui-button nav family-nav';
+  games.setAttribute('aria-label', 'Åpne spill');
+  const gameIcon = node('span');
+  gameIcon.setAttribute('aria-hidden', 'true');
+  gameIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6h10c3 0 5 11 3 12-2 1-4-3-5-3H9c-1 0-3 4-5 3-2-1 0-12 3-12Z"/><path d="M7 9v5M4.5 11.5h5"/><circle cx="16" cy="10" r=".7"/><circle cx="18" cy="13" r=".7"/></svg>';
+  games.append(gameIcon, document.createTextNode('Spill'));
+  document.querySelector('[data-tab="meals"]').after(games);
   let choreWeek = monday(today());
   let mealWeek = choreWeek;
   function weekBar(start, change) {

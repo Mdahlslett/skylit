@@ -205,6 +205,11 @@ public class MainActivity extends Activity {
     @JavascriptInterface public void openCalendar(String url){if(validCalendar(url))runOnUiThread(()->openRemote(url,false,false));}
     @JavascriptInterface public void openWifiSettings(){runOnUiThread(()->{try{startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));}catch(android.content.ActivityNotFoundException e){Toast.makeText(MainActivity.this,"Wi-Fi settings are unavailable on this device.",Toast.LENGTH_LONG).show();}});}
     @JavascriptInterface public void openDeveloperSettings(){runOnUiThread(()->{try{startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));}catch(android.content.ActivityNotFoundException e){Toast.makeText(MainActivity.this,"Developer settings are unavailable on this device.",Toast.LENGTH_LONG).show();}});}
+    @JavascriptInterface public void openGame(){runOnUiThread(()->{
+      Intent launch=getPackageManager().getLaunchIntentForPackage("no.skylit.klooni.dashboard");
+      if(launch==null){Toast.makeText(MainActivity.this,"Spillet er ikke installert.",Toast.LENGTH_LONG).show();return;}
+      try{startActivity(launch);}catch(android.content.ActivityNotFoundException|SecurityException e){Toast.makeText(MainActivity.this,"Kunne ikke åpne spillet.",Toast.LENGTH_LONG).show();}
+    });}
     @JavascriptInterface public void openDavx(){runOnUiThread(()->{
       Intent launch=getPackageManager().getLaunchIntentForPackage("at.bitfire.davdroid");
       if(launch==null){Toast.makeText(MainActivity.this,"DAVx⁵ er ikke installert.",Toast.LENGTH_LONG).show();return;}

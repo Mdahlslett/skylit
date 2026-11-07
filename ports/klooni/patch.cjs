@@ -98,3 +98,34 @@ tasks.named('preBuild').configure { dependsOn 'copyNatives' }
 edit('android/res/values/strings.xml',s=>s.replace('1010! Klooni','Klooni liggende'));
 console.log('Patched landscape layout');
 
+
+const themeFile=path.join(root,'android/assets/themes/default.theme');
+const theme=JSON.parse(fs.readFileSync(themeFile,'utf8'));
+theme.name='Skylit';
+theme.colors={
+ background:'eee8ddff',foreground:'39332dff',
+ buttons:['d9c9b5ff','d8c18eff','b9c6bbff','cfb4a7ff'],
+ empty_cell:'e0d8ccff',
+ cells:['aab4c4ff','b8c5a2ff','a6c4b7ff','d9c28eff','cba587ff','c5a6adff','bd9388ff','a4b69cff','a3bdc5ff'],
+ current_score:'795944ff',high_score:'596e60ff',bonus:'534a40ff',band:'ded3c3ff',text:'39332dff'
+};
+fs.writeFileSync(themeFile,JSON.stringify(theme,null,2));
+edit('android/build.gradle',s=>s.replace("applicationId 'no.skylit.klooni'","applicationId 'no.skylit.klooni.dashboard'"));
+edit('core/src/dev/lonami/klooni/game/GameLayout.java',s=>s.replaceAll('h/1080f*.65f','h/1080f*.9f'));
+edit('core/src/dev/lonami/klooni/game/BaseScorer.java',s=>s.replace('com.badlogic.gdx.graphics.Color.GRAY','com.badlogic.gdx.graphics.Color.valueOf("756b5e")'));
+edit('core/src/dev/lonami/klooni/actors/Band.java',s=>s.replace('"pause menu"','"Pause"'));
+edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>s.replace('com.wesbos.homehq.webview74.skolelinje','com.wesbos.homehq.webview74.spill').replace('        controls.addView(pause);controls.addView(home);',`
+        for(android.widget.Button control:new android.widget.Button[]{pause,home}){
+            control.setAllCaps(false);control.setTextSize(17);
+            control.setTextColor(android.graphics.Color.rgb(57,51,45));
+            control.setTypeface(android.graphics.Typeface.create("sans-serif",android.graphics.Typeface.NORMAL));
+            android.graphics.drawable.GradientDrawable background=new android.graphics.drawable.GradientDrawable();
+            background.setColor(android.graphics.Color.rgb(224,215,201));background.setCornerRadius(12*getResources().getDisplayMetrics().density);
+            background.setStroke(1,android.graphics.Color.rgb(203,192,176));control.setBackground(background);
+            control.setElevation(0);
+            int inset=(int)(16*getResources().getDisplayMetrics().density);
+            control.setPadding(inset,inset/2,inset,inset/2);
+            android.widget.LinearLayout.LayoutParams item=new android.widget.LinearLayout.LayoutParams(-2,(int)(48*getResources().getDisplayMetrics().density));
+            item.leftMargin=(int)(8*getResources().getDisplayMetrics().density);
+            controls.addView(control,item);
+        }`));
