@@ -258,3 +258,5 @@ edit('core/src/dev/lonami/klooni/screens/PauseMenuStage.java',s=>s.replace('band
 edit('core/src/dev/lonami/klooni/game/TimeScorer.java',s=>s.replace('labelStyle.font = game.skin.getFont("font");','labelStyle.font = game.skin.getFont("font_small");'));
 edit('core/src/dev/lonami/klooni/game/GameLayout.java',s=>s.replace('timeLeftLabel.setFontScale(.7f);','timeLeftLabel.setFontScale(1.4f);'));
 edit('core/src/dev/lonami/klooni/actors/Band.java',s=>s.replace('labelStyle.font = game.skin.getFont("font");','labelStyle.font = game.skin.getFont("font_small");').replace('scoreLabel.setAlignment(Align.center);','scoreLabel.setAlignment(Align.center);scoreLabel.setFontScale(2);').replace('infoLabel.setAlignment(Align.center);','infoLabel.setAlignment(Align.center);infoLabel.setFontScale(2);'));
+
+edit('core/src/dev/lonami/klooni/game/TimeScorer.java',s=>s.replace('private static final long START_TIME = 30 * 1000000000L;','private static final long START_TIME = 45 * 1000000000L;'));
