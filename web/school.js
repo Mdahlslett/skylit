@@ -51,6 +51,7 @@
   const icon=node('span');icon.dataset.icon='school';icon.innerHTML=app.icon('school');
   menu.append(icon,document.createTextNode('Skoleplaner'));
   document.querySelector('[data-tab=calendar]').after(menu);
+  const ratios=new Map();
   let child='Matilda',items=[],selected='',page=0,zoom=1,fitPage=false,uploadOpen=false,signature='',imageKey='';
   try{const saved=localStorage.getItem('skylit.school.child');if(children.includes(saved))child=saved;}catch(_){}
   const tabButtons=new Map();
@@ -114,7 +115,8 @@
     pageLabel.textContent='Side '+(page+1)+' av '+document.pages;
     const available=Math.max(240,viewer.clientWidth-24);
     const height=Math.max(160,viewer.clientHeight-24);
-    const displayWidth=fitPage?Math.min(available,height*document.width/document.height):available*zoom;
+    const ratio=ratios.get(selected+':'+page)||document.width/document.height;
+    const displayWidth=fitPage?Math.min(available,height*ratio):available*zoom;
     image.style.width=displayWidth+'px';
     image.style.height='auto';
     image.alt=document.title+' · side '+(page+1);
@@ -127,7 +129,7 @@
     }
   }
   image.onerror=()=>{empty.hidden=false;empty.textContent='Kunne ikke vise PDF-siden. Velg dokumentet på nytt.';};
-  image.onload=()=>{empty.hidden=true;};
+  image.onload=()=>{empty.hidden=true;if(image.naturalHeight){ratios.set(selected+':'+page,image.naturalWidth/image.naturalHeight);if(fitPage)showPage();}};
   function changePage(offset){page+=offset;imageKey='';showPage();}
   function removeDocument(){
     const item=items.find(item=>item.id===selected);
