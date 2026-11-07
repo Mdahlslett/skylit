@@ -18,7 +18,7 @@
     if(originals.has(definition.type))wrapper.append(originals.get(definition.type));
     else {
       wrapper.classList.add('card','dashboard-utility');const heading=node('div','section-title'),title=node('h2',null,definition.name),action=node('button','quiet');
-      window.SkylitUI.renderNode(action,window.SkylitUI.template("ModuleActionIcon"));
+      if(definition.type!=='note')window.SkylitUI.renderNode(action,window.SkylitUI.template("ModuleActionIcon"));
       action.setAttribute('aria-label',definition.type==='forecast'?'Åpne værvarselet':'Åpne '+definition.name.toLowerCase());
       action.onclick=()=>definition.type==='forecast'?app.go('weather'):definition.type==='note'||definition.type==='countdowns'?app.openSettings('household','overview'):app.go(definition.type==='shopping'?'shopping':'household');
       const content=node('div','dashboard-module-content');
@@ -26,7 +26,7 @@
         const input=node('textarea','dashboard-note-input');
         input.setAttribute('aria-label','Huskelapp');
         input.placeholder='Skriv en huskelapp …';
-        input.maxLength=280;
+        input.maxLength=600;
         action.type='button';
         action.textContent='Lagre';
         action.setAttribute('aria-label','Lagre huskelappen');
