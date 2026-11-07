@@ -254,3 +254,7 @@ edit('core/src/dev/lonami/klooni/game/TimeScorer.java',s=>s.replace('return "tim
 edit('core/src/dev/lonami/klooni/game/GameLayout.java',s=>s.replace('        if(landscape())timeLeftLabel.setBounds','        timeLeftLabel.setFontScale(.7f);\n        if(landscape())timeLeftLabel.setBounds'));
 edit('core/src/dev/lonami/klooni/screens/GameScreen.java',s=>s.replace('    public void pause() {\n        save();\n    }','    public void pause() {\n        if(!pauseMenu.isShown()&&!gameOverDone)showPauseMenu();else save();\n    }'));
 edit('core/src/dev/lonami/klooni/screens/PauseMenuStage.java',s=>s.replace('band.setMessage("Spillet er slutt");','band.setMessage(timeMode?"Tiden er ute":"Spillet er slutt");'));
+
+edit('core/src/dev/lonami/klooni/game/TimeScorer.java',s=>s.replace('labelStyle.font = game.skin.getFont("font");','labelStyle.font = game.skin.getFont("font_small");'));
+edit('core/src/dev/lonami/klooni/game/GameLayout.java',s=>s.replace('timeLeftLabel.setFontScale(.7f);','timeLeftLabel.setFontScale(1.4f);'));
+edit('core/src/dev/lonami/klooni/actors/Band.java',s=>s.replace('labelStyle.font = game.skin.getFont("font");','labelStyle.font = game.skin.getFont("font_small");').replace('scoreLabel.setAlignment(Align.center);','scoreLabel.setAlignment(Align.center);scoreLabel.setFontScale(2);').replace('infoLabel.setAlignment(Align.center);','infoLabel.setAlignment(Align.center);infoLabel.setFontScale(2);'));
