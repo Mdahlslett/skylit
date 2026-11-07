@@ -21,7 +21,26 @@
       window.SkylitUI.renderNode(action,window.SkylitUI.template("ModuleActionIcon"));
       action.setAttribute('aria-label',definition.type==='forecast'?'Åpne værvarselet':'Åpne '+definition.name.toLowerCase());
       action.onclick=()=>definition.type==='forecast'?app.go('weather'):definition.type==='note'||definition.type==='countdowns'?app.openSettings('household','overview'):app.go(definition.type==='shopping'?'shopping':'household');
-      heading.append(title);if(definition.type!=='ruter')heading.append(action);wrapper.append(heading,node('div','dashboard-module-content'));
+      const content=node('div','dashboard-module-content');
+      if(definition.type==='note'){
+        const input=node('textarea','dashboard-note-input');
+        input.setAttribute('aria-label','Huskelapp');
+        input.placeholder='Skriv en huskelapp …';
+        input.maxLength=280;
+        action.type='button';
+        action.textContent='Lagre';
+        action.setAttribute('aria-label','Lagre huskelappen');
+        action.disabled=true;
+        input.oninput=()=>{action.disabled=input.value===savedNote;};
+        action.onclick=()=>{
+          if(!app.saveHouseholdNote(input.value)){app.notify('Kunne ikke lagre huskelappen.');return;}
+          input.value=savedNote;
+          action.disabled=true;
+          app.notify('Huskelappen er lagret.');
+        };
+        content.append(input);
+      }
+      heading.append(title);if(definition.type!=='ruter')heading.append(action);wrapper.append(heading,content);
     }
     wrapper.hidden=true;wrappers.set(definition.type,wrapper);grid.append(wrapper);
   }
@@ -201,9 +220,14 @@
   new MutationObserver(renderForecast).observe($('weather-status'),{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});
   const today=()=>{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:app.calendarPreferences().timezone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),get=key=>parts.find(p=>p.type===key).value;return get('year')+'-'+get('month')+'-'+get('day');};
   let renderedDay=today();
+  let savedNote = '';
   function renderUtilities(){
     renderedDay=today();const house=app.householdState();
-    for(const type of ['note','shopping','countdowns','timers']){
+    const note = wrappers.get('note').querySelector('textarea');
+    if(note.value===savedNote)note.value=house.note;
+    savedNote=house.note;
+    note.dispatchEvent(new Event('input'));
+    for(const type of ['shopping','countdowns','timers']){
       const host=wrappers.get(type).querySelector('.dashboard-module-content');
       window.SkylitUI.dashboard.utility(host,{type,house,today:today(),dayDelta:SkylitFrameModel.dayDelta,onCheck(id){app.toggleShopping(id);(host.querySelector('button')||wrappers.get(type).querySelector('.quiet')).focus({preventScroll:true});}});
     }

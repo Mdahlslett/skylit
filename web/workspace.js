@@ -127,7 +127,12 @@
   $('show-household').checked=prefs.household;$('show-household').onchange=()=>setPref('household',$('show-household').checked);$('household-excerpt').checked=prefs.excerpt;$('household-excerpt').onchange=()=>setPref('excerpt',$('household-excerpt').checked);$('household-open').onclick=()=>app.go('household');$('household-options').onclick=()=>openSettings('household','household');$('note-edit').onclick=()=>{openSettings('household','household');$('household-note-input').focus();};$('household-note-input').value=house.note;
   app.householdState=()=>model.household(house);app.toggleShopping=target=>{const item=house.shopping.find(item=>item.id===target);if(!item)return false;remember();return saveHouse({...house,shopping:house.shopping.map(row=>row.id===target?{...row,done:!row.done}:row)});};
   function saveHouse(next){next=model.household(next);if(!write('skylit.household',next))return false;house=next;renderHousehold();return true;}
-  $('household-note-save').onclick=()=>{if(saveHouse({...house,note:$('household-note-input').value}))saved('Beskjeden er lagret.');};
+  app.saveHouseholdNote=value=>{
+    if(!saveHouse({...house,note:value}))return false;
+    $('household-note-input').value=house.note;
+    return true;
+  };
+  $('household-note-save').onclick=()=>{if(app.saveHouseholdNote($('household-note-input').value))saved('Huskelappen er lagret.');};
   const id=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);let undo=null;
   function remember(){undo=JSON.parse(JSON.stringify(house.shopping));$('shopping-undo').hidden=false;}
   $('shopping-add').onsubmit=e=>{e.preventDefault();const text=$('shopping-input').value.trim();if(!text)return;if(house.shopping.length>=60){app.notify('Handlelista er full. Fjern avkryssede varer først.');return;}remember();if(saveHouse({...house,shopping:house.shopping.concat({id:id(),text,done:false})}))$('shopping-input').value='';};

@@ -445,3 +445,10 @@
     grid-template-rows:repeat(9,minmax(0,1fr)) repeat(3,minmax(0,1.55fr))!important;
   }
 }
+
+.rail .family-nav{font-family:inherit;font-weight:inherit}
+#overview .dashboard-module[data-module=note]{padding:12px 16px;box-sizing:border-box}
+#overview .dashboard-module[data-module=note] h2{font:normal 24px/1.15 Georgia,serif}
+#overview .dashboard-module[data-module=note] .dashboard-module-content{flex:1;display:flex;min-height:0}
+.dashboard-note-input{display:block;width:100%;min-height:44px;box-sizing:border-box;resize:none;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:8px;font:inherit}
+.dashboard-note-input::placeholder{color:var(--muted)}

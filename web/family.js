@@ -45,8 +45,11 @@
     section.id = id;
     section.append(node('h1', title));
     const settings = document.querySelector('[data-tab="settings"]');
-    const nav = button(title, () => app.go(id));
-    nav.className = 'nav';
+    const nav = button('', () => app.go(id));
+    nav.className = 'nav family-nav';
+    const icon = node('span');
+    icon.innerHTML = app.icon(id);
+    nav.append(icon, document.createTextNode(title));
     nav.dataset.tab = id;
     settings.parentNode.insertBefore(nav, settings);
     document.getElementById('calendar').parentNode.append(section);
