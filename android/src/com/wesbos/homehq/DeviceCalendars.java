@@ -11,7 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/** Read-only view of calendars synchronized by DAVx⁵. */
+/** Read-only view of DAVx5 and ICSx5 synchronized calendars. */
 final class DeviceCalendars {
   private static final String ACCOUNT_TYPE = "bitfire.at.davdroid";
   private static final String[] COLORS = {"#547d91", "#9a513b", "#687354", "#916980", "#ad7937"};
@@ -20,7 +20,7 @@ final class DeviceCalendars {
     JSONArray sources = new JSONArray();
     String[] columns = {Calendars._ID, Calendars.CALENDAR_DISPLAY_NAME};
     try (Cursor rows = resolver.query(Calendars.CONTENT_URI, columns,
-        Calendars.ACCOUNT_TYPE + "=?", new String[]{ACCOUNT_TYPE}, Calendars._ID + " ASC")) {
+        Calendars.ACCOUNT_TYPE + " IN (?,?)", new String[]{ACCOUNT_TYPE, "at.bitfire.icsdroid"}, Calendars._ID + " ASC")) {
       while (rows != null && rows.moveToNext()) {
         long id = rows.getLong(0);
         String name = rows.getString(1);
