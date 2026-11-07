@@ -474,3 +474,36 @@
 #overview .dashboard-family .overview-plans{padding:16px;min-height:0}
 #overview .dashboard-family .sk-week-days{border-top:0}
 #overview .dashboard-family .sk-week-day{padding-top:0}
+
+/* Handleliste: store berøringsflater og samme rolige materialer som resten av rammen. */
+#shopping .shopping-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+#shopping .shopping-header h1{margin-bottom:6px}
+#shopping .shopping-count{margin:0;color:var(--muted);font-size:16px}
+#shopping .shopping-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:20px;align-items:start}
+#shopping .shopping-card,#shopping .shopping-done-card{padding:24px;border-radius:18px}
+#shopping h2{font-size:26px;margin:0 0 12px}
+#shopping .shopping-done-card>p{margin:0 0 22px}
+#shopping #shopping-add{display:flex;gap:10px;margin:12px 0 24px}
+#shopping #shopping-input{flex:1;width:0;min-width:0;min-height:56px;padding:12px 16px;border-radius:12px;font-size:19px}
+#shopping #shopping-add button{padding:12px 20px;border-radius:12px;background:var(--accent);color:var(--bg);font-weight:600;white-space:nowrap}
+#shopping #shopping-items,#shopping #shopping-completed{display:flex;flex-direction:column;gap:10px}
+#shopping .shopping-item{display:flex;align-items:center;text-align:left;width:100%;min-height:70px;padding:16px;gap:16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:20px;line-height:1.35;white-space:normal;overflow-wrap:break-word}
+#shopping .shopping-mark{display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex:0 0 28px;border:1.5px solid var(--muted);border-radius:8px;font-size:0}
+#shopping .shopping-item[aria-pressed=true]{color:var(--muted);border-color:var(--line);background:transparent}
+#shopping .shopping-item[aria-pressed=true] .shopping-mark{font-size:18px;color:var(--bg);background:var(--accent);border-color:var(--accent)}
+#shopping .shopping-item[aria-pressed=true]>span:last-child{text-decoration:line-through}
+#shopping .shopping-empty{text-align:center;padding:42px 16px 48px;color:var(--muted)}
+#shopping .shopping-empty h3{color:var(--ink);font-size:24px;font-weight:400;margin:18px 0 10px}
+#shopping .shopping-empty p{margin:0;font-size:16px}
+#shopping .shopping-empty-icon svg{width:48px;height:48px;opacity:.65}
+#shopping #shopping-items>p{display:none}
+#shopping [hidden]{display:none!important}
+#shopping .ui-disclosure{border:0;padding:0;margin:0}
+#shopping .ui-disclosure-title{padding:0 0 14px;font-size:15px;color:var(--muted);min-height:30px}
+#shopping #shopping-clear{margin-top:20px;padding:10px 14px}
+#shopping .shopping-done-empty #shopping-completed:after{content:'Her vises varene etter hvert som du handler.';display:block;color:var(--muted);font-size:16px;line-height:1.6;padding:12px 0 20px}
+#shopping .shopping-item:focus-visible,#shopping input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:800px){#shopping .shopping-layout{grid-template-columns:1fr}#shopping .shopping-card,#shopping .shopping-done-card{padding:18px}}
+
+#shopping .shopping-card{grid-column:1;grid-row:1;order:0}#shopping .shopping-done-card{grid-column:2;grid-row:1;order:0}
+@media(max-width:800px){#shopping .shopping-done-card{grid-column:1;grid-row:2}}

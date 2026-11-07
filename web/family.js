@@ -59,15 +59,46 @@
   const shopping = page('shopping', 'Handleliste');
   const shoppingPanel = document.getElementById('shopping-add').closest('article');
   if (shoppingPanel) {
-    shopping.append(shoppingPanel);
+    const title = shopping.querySelector('h1');
+    const header = node('div', '', 'shopping-header');
+    const intro = node('div');
+    const count = node('p', '', 'shopping-count');
+    intro.append(title, count);
+    header.append(intro, document.getElementById('shopping-undo'));
+    const layout = node('div', '', 'shopping-layout');
+    const completed = shoppingPanel.querySelector('details');
+    const aside = node('aside', '', 'card shopping-done-card');
+    aside.append(node('h2', 'I handlekurven'), node('p', 'Varene du har krysset av.', 'subtle'), completed);
+    layout.append(shoppingPanel, aside);
+    shopping.append(header, layout);
     const heading = shoppingPanel.querySelector('h2,h3');
-    if (heading) heading.hidden = true;
+    if (heading) {heading.hidden = false;heading.textContent = 'Dette trenger vi';}
     const input = document.getElementById('shopping-input');
-    input.placeholder = 'Legg til en vare';
-    input.setAttribute('aria-label', 'Vare');
-    document.getElementById('shopping-add').querySelector('button').textContent = 'Legg til';
-    document.getElementById('shopping-clear').textContent = 'Fjern avkryssede';
-    document.getElementById('shopping-undo').textContent = 'Angre';
+    input.placeholder = 'Hva trenger vi?';
+    input.setAttribute('aria-label', 'Legg til en vare');
+    document.getElementById('shopping-add').querySelector('button').textContent = '+ Legg til';
+    const clear = document.getElementById('shopping-clear');
+    clear.textContent = 'Fjern avkryssede';
+    clear.type = 'button';
+    const undo = document.getElementById('shopping-undo');
+    undo.textContent = 'Angre';
+    undo.type = 'button';
+    completed.open = true;
+    const empty = node('div', '', 'shopping-empty');
+    const symbol = node('span', '', 'shopping-empty-icon');
+    symbol.innerHTML = app.icon('shopping');
+    empty.append(symbol, node('h3', 'Alt klart for neste handletur'), node('p', 'Legg til det dere trenger i feltet over.'));
+    shoppingPanel.append(empty);
+    function updateShoppingSummary() {
+      const items = app.householdState().shopping;
+      const remaining = items.filter(item => !item.done).length;
+      count.textContent = remaining ? remaining + (remaining === 1 ? ' vare igjen' : ' varer igjen') : 'En liten oversikt over det dere trenger';
+      empty.hidden = remaining > 0;
+      clear.hidden = !items.some(item => item.done);
+      aside.classList.toggle('shopping-done-empty', !items.some(item => item.done));
+    }
+    window.addEventListener('skylit-household', updateShoppingSummary);
+    updateShoppingSummary();
   }
   const chores = page('chores', 'Gjøremål');
   const meals = page('meals', 'Middagsplan');
