@@ -230,3 +230,5 @@ main{margin:0 auto}
 #calendar .cal-grid .cal-day{height:var(--calendar-day-size,82px);min-height:0;overflow:hidden}
 
 #calendar .cal-grid{grid-template-rows:repeat(6,var(--calendar-day-size,82px));align-content:start;flex:none}
+
+#calendar .cal-month{overflow-y:auto}
