@@ -471,9 +471,6 @@
     grid-template-rows:repeat(4,var(--family-top-track,40px)) repeat(8,var(--family-bottom-track,45px))!important;
   }
 }
-#overview .dashboard-family .overview-plans>.section-title,
-#overview .dashboard-family #overview-calendar-status,
-#overview .dashboard-family .sk-week-head{display:none}
-#overview .dashboard-family .overview-plans{padding:8px;min-height:0}
+#overview .dashboard-family .overview-plans{padding:16px;min-height:0}
 #overview .dashboard-family .sk-week-days{border-top:0}
 #overview .dashboard-family .sk-week-day{padding-top:0}
