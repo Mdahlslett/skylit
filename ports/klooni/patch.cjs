@@ -139,3 +139,58 @@ edit('core/src/dev/lonami/klooni/game/PieceHolder.java',s=>{
 });
 edit('core/src/dev/lonami/klooni/Klooni.java',s=>s.replace('return !prefs.getBoolean("muteSound", false);','return false; // Quiet family-frame edition.'));
 edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>s.replace('control.setAllCaps(false);','control.setSoundEffectsEnabled(false);control.setAllCaps(false);'));
+
+edit('core/src/dev/lonami/klooni/screens/MainMenuScreen.java',s=>{
+ const start=s.indexOf('        // Play button');
+ const end=s.indexOf('\n    }',start);
+ return s.slice(0,start)+`
+        com.badlogic.gdx.scenes.scene2d.ui.Label record=new com.badlogic.gdx.scenes.scene2d.ui.Label(
+            "Rekord "+Klooni.getMaxScore(),new com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle(game.skin.getFont("font_small"),Klooni.theme.highScore));
+        table.add(record).padBottom(40).row();
+        com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle base=Klooni.theme.getStyle(0);
+        com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle style=new com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle();
+        style.up=base.up;style.down=base.down;style.font=game.skin.getFont("font_small");style.fontColor=Klooni.theme.textColor;
+        com.badlogic.gdx.scenes.scene2d.ui.TextButton playButton=new com.badlogic.gdx.scenes.scene2d.ui.TextButton("Spill",style);
+        playButton.addListener(new ChangeListener(){public void changed(ChangeEvent event,Actor actor){
+            MainMenuScreen.this.game.transitionTo(new GameScreen(MainMenuScreen.this.game,GameScreen.GAME_MODE_SCORE));
+        }});
+        table.add(playButton).width(Gdx.graphics.getWidth()*.28f).height(Gdx.graphics.getHeight()*.16f);
+`+s.slice(end);
+});
+edit('core/src/dev/lonami/klooni/screens/PauseMenuStage.java',s=>{
+ s=s.replace('        table.add(homeButton).space(16);','').replace('        table.add(customButton).space(16);','').replace('        table.row();','');
+ const start=s.indexOf('    void showGameOver(');
+ const end=s.indexOf('\n    boolean isShown()',start);
+ return s.slice(0,start)+`
+    void showGameOver(final String gameOverReason, final boolean timeMode) {
+        playButton.setVisible(false);
+        band.setMessage("Spillet er slutt");
+        show();
+    }
+`+s.slice(end);
+});
+edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>{
+ s=s.replace('com.wesbos.homehq.webview74.spill','com.wesbos.homehq.webview74.spilllys');
+ s=s.replace('        initialize(new Klooni(shareChallenge), config);','        applyFrameBrightness(getIntent());\n        initialize(new Klooni(shareChallenge), config);');
+ const end=s.lastIndexOf('\n}');
+ return s.slice(0,end)+`
+    private final android.content.BroadcastReceiver frameLight=new android.content.BroadcastReceiver(){
+        @Override public void onReceive(android.content.Context context,android.content.Intent intent){applyFrameBrightness(intent);}
+    };
+    private boolean lightRegistered;
+    private void applyFrameBrightness(android.content.Intent intent){
+        android.content.SharedPreferences light=getSharedPreferences("frame-light",MODE_PRIVATE);
+        float value=intent!=null&&intent.hasExtra("skylit.brightness")?intent.getFloatExtra("skylit.brightness",-1):light.getFloat("brightness",-1);
+        if(Float.isNaN(value)||!(value==-1||value>=.05f&&value<=1))return;
+        light.edit().putFloat("brightness",value).apply();
+        android.view.WindowManager.LayoutParams attributes=getWindow().getAttributes();
+        attributes.screenBrightness=value;getWindow().setAttributes(attributes);
+    }
+    @Override protected void onNewIntent(android.content.Intent intent){super.onNewIntent(intent);setIntent(intent);applyFrameBrightness(intent);}
+    @Override protected void onStart(){
+        super.onStart();
+        if(!lightRegistered){registerReceiver(frameLight,new android.content.IntentFilter("no.skylit.klooni.BRIGHTNESS"));lightRegistered=true;}
+    }
+    @Override protected void onStop(){if(lightRegistered){unregisterReceiver(frameLight);lightRegistered=false;}super.onStop();}
+`+s.slice(end);
+});

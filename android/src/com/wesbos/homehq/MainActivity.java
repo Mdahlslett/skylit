@@ -208,6 +208,7 @@ public class MainActivity extends Activity {
     @JavascriptInterface public void openGame(){runOnUiThread(()->{
       Intent launch=getPackageManager().getLaunchIntentForPackage("no.skylit.klooni.dashboard");
       if(launch==null){Toast.makeText(MainActivity.this,"Spillet er ikke installert.",Toast.LENGTH_LONG).show();return;}
+      launch.putExtra("skylit.brightness",getWindow().getAttributes().screenBrightness);
       try{startActivity(launch);}catch(android.content.ActivityNotFoundException|SecurityException e){Toast.makeText(MainActivity.this,"Kunne ikke åpne spillet.",Toast.LENGTH_LONG).show();}
     });}
     @JavascriptInterface public void openDavx(){runOnUiThread(()->{
@@ -237,7 +238,7 @@ public class MainActivity extends Activity {
     @JavascriptInterface public boolean mediaExportFinish(String id){return exports.submit(id,null,true);}
     @JavascriptInterface public String mediaExportStatus(String id){return exports.status(id);}
     @JavascriptInterface public void mediaExportCancel(){exports.cancel();}
-    @JavascriptInterface public void slideshowBrightness(float value){if(value!=-1&&(value<.05f||value>1||Float.isNaN(value)))return;runOnUiThread(()->{WindowManager.LayoutParams attributes=getWindow().getAttributes();if(attributes.screenBrightness!=value){attributes.screenBrightness=value;getWindow().setAttributes(attributes);}});}
+    @JavascriptInterface public void slideshowBrightness(float value){if(value!=-1&&(value<.05f||value>1||Float.isNaN(value)))return;runOnUiThread(()->{WindowManager.LayoutParams attributes=getWindow().getAttributes();if(attributes.screenBrightness!=value){attributes.screenBrightness=value;getWindow().setAttributes(attributes);Intent brightness=new Intent("no.skylit.klooni.BRIGHTNESS").setPackage("no.skylit.klooni.dashboard");brightness.putExtra("skylit.brightness",value);sendBroadcast(brightness);}});}
     @JavascriptInterface public String schoolPlanList(String child){return schoolPlans.snapshot(child).toString();}
     @JavascriptInterface public boolean schoolPlanRemove(String child,String id){return schoolPlans.remove(child,id);}
     @JavascriptInterface public boolean schoolPlanStartUpload(String child){return phone.startSchool(child);}
