@@ -129,3 +129,13 @@ edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>s.replace('com.wesb
             item.leftMargin=(int)(8*getResources().getDisplayMetrics().density);
             controls.addView(control,item);
         }`));
+
+edit('core/src/dev/lonami/klooni/game/PieceHolder.java',s=>{
+ const start=s.indexOf('            if (Klooni.onDesktop)');
+ const end=s.indexOf('            if (Klooni.shouldSnapToGrid())',start);
+ if(start<0||end<0)throw Error('Drag implementation changed');
+ s=s.slice(0,start)+'            // Keep the full-size piece centered directly under the touch point.\n            mouse.sub(piece.cellCols*pickedCellSize*.5f,piece.cellRows*pickedCellSize*.5f);\n'+s.slice(end);
+ return s.replace('piece.pos.lerp(mouse, DRAG_SPEED);','piece.pos.set(mouse);').replace('piece.cellSize = Interpolation.linear.apply(piece.cellSize, pickedCellSize, DRAG_SPEED);','piece.cellSize = pickedCellSize;').replace('            put = enabled && board.putScreenPiece(pieces[heldPiece]);','            update();\n            put = enabled && board.putScreenPiece(pieces[heldPiece]);');
+});
+edit('core/src/dev/lonami/klooni/Klooni.java',s=>s.replace('return !prefs.getBoolean("muteSound", false);','return false; // Quiet family-frame edition.'));
+edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>s.replace('control.setAllCaps(false);','control.setSoundEffectsEnabled(false);control.setAllCaps(false);'));
