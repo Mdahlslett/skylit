@@ -18,3 +18,12 @@
 .school-upload-panel .phone-pair-qr{display:block;width:260px;max-width:100%;height:auto;margin:12px auto}
 .school-upload-panel button{margin:6px 4px 0 0;min-height:44px}
 .school-pair-number{display:block;font-size:30px;letter-spacing:4px;margin:14px 0}
+
+/* Dokumentvalg og lesekontroller deler én rad på rammen. */
+.school-toolbar{display:flex;align-items:center;flex-shrink:0;overflow-x:auto;margin-bottom:8px;min-height:44px}
+.school-toolbar .school-documents{flex:1 1 180px;min-width:120px;max-height:none;margin:0 12px 0 0}
+.school-toolbar .school-documents button{flex-shrink:0;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.school-toolbar .school-controls{flex:0 0 auto;flex-wrap:nowrap;margin:0}
+.school-toolbar .school-controls>*{flex-shrink:0;white-space:nowrap}
+.school-toolbar .school-controls span{min-width:90px}
+.school-toolbar .school-controls .quiet{margin-left:12px;margin-right:0}

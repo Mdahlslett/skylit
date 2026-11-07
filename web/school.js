@@ -43,7 +43,9 @@
   viewer.append(image,empty);
   const panel=node('aside','school-upload-panel');
   panel.hidden=true;
-  section.append(heading,tabs,documents,controls,viewer,panel);
+  const toolbar=node('div','school-toolbar');
+  toolbar.append(documents,controls);
+  section.append(heading,tabs,toolbar,viewer,panel);
   const calendar=document.getElementById('calendar');
   calendar.after(section);
   const menu=button('',()=>app.go('school'),'ui-button nav');
