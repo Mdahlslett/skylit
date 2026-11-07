@@ -161,10 +161,7 @@
   setInterval(refreshRuter,15000);
 
   function applyLayout(){
-    const week = model.preset('week').modules;
-    grid.classList.toggle('dashboard-fill-bottom',week.every(expected=>saved.modules.some(item=>
-      item.type===expected.type&&['x','y','w','h'].every(key=>item[key]===expected[key])
-    ))&&saved.modules.length===week.length);
+    grid.classList.toggle('dashboard-fill-bottom',saved.modules.length>0);
     for(const [type,n] of wrappers){const item=saved.modules.find(item=>item.type===type);n.hidden=!item;if(item)position(n,item);if(type==='plans')n.dataset.week=String(!!item&&item.w>=7);}
     // Match reading and keyboard order to the visible arrangement.
     saved.modules.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(item=>grid.append(wrappers.get(item.type)));
