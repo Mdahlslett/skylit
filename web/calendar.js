@@ -178,3 +178,12 @@ window.addEventListener('skylit-tab',e=>{if(e.detail==='calendar'||e.detail==='o
 setInterval(()=>{const now=today();if(lastToday!==now){if(selected===lastToday){selected=now;month=now.slice(0,7);}lastToday=now;render();}status();paintOverview();if(available&&sources.some(s=>!s.device&&Date.now()-s.fetchedAt>15*60000))refresh();else if(available&&bridge.deviceCalendarAllowed&&bridge.deviceCalendarAllowed())render();},60000);
 if(available)read();paint();render();if(available)refresh();
 })();
+
+/* WebView 74 predates CSS aspect-ratio. Use the actual grid column width. */
+(() => {
+  const grid = document.querySelector('#calendar .cal-grid');
+  new ResizeObserver(() => {
+    const width = parseFloat(getComputedStyle(grid).gridTemplateColumns);
+    if (width > 0) grid.style.setProperty('--calendar-day-size', width + 'px');
+  }).observe(grid);
+})();

@@ -22,7 +22,7 @@ type WeatherState = {
 export const weatherStore = createStore<WeatherState>({
   data: null,
   city: {
-    name: "Choose your city",
+    name: "Velg sted",
     admin1: "",
     timezone: "UTC",
     latitude: null,
@@ -30,7 +30,7 @@ export const weatherStore = createStore<WeatherState>({
   clock: "12",
   busy: false,
   error: false,
-  status: "Getting the latest forecast…",
+  status: "Henter siste værvarsel …",
   now: Date.now(),
 });
 const round = (value: unknown) =>
@@ -40,7 +40,7 @@ function time(
   epoch: number,
   options: Intl.DateTimeFormatOptions = {},
 ) {
-  return new Intl.DateTimeFormat("en-CA", {
+  return new Intl.DateTimeFormat("nb-NO", {
     timeZone: s.city.timezone,
     hour: "numeric",
     minute: "2-digit",
@@ -94,15 +94,15 @@ function WeatherContent({ s }: { s: WeatherState }) {
     stale = !!window.SkylitOverview.weather(data)?.stale;
   const placeholder =
     s.city.latitude === null
-      ? "Choose a city to show the hourly forecast."
+      ? "Velg et sted for å se timevarselet."
       : s.busy
-        ? "Loading forecast…"
-        : "Saved hourly forecast has expired. Refresh when connected.";
+        ? "Henter værvarsel …"
+        : "Det lagrede timevarselet har utløpt. Oppdater når du er på nett.";
   return (
     <>
       <div className="page-heading">
         <div>
-          <h1>Weather</h1>
+          <h1>Vær</h1>
         </div>
         <Button
           id="refresh"
@@ -111,7 +111,7 @@ function WeatherContent({ s }: { s: WeatherState }) {
           onClick={() => window.SkylitApp.refreshWeather()}
         >
           <Icon name="refresh" />
-          Refresh
+          Oppdater
         </Button>
       </div>
       <div
@@ -125,7 +125,7 @@ function WeatherContent({ s }: { s: WeatherState }) {
         <article className="hero card">
           <div className="hero-copy">
             <p className="eyebrow" id="weather-label">
-              {stale ? "SAVED CONDITIONS" : "RIGHT NOW"}
+              {stale ? "LAGRET VÆRSTATUS" : "AKKURAT NÅ"}
             </p>
             <div className="temperature">
               <span id="temperature">{round(c?.temperature_2m)}</span>
@@ -135,22 +135,22 @@ function WeatherContent({ s }: { s: WeatherState }) {
               {c
                 ? describe(c.weather_code).label
                 : s.city.latitude === null
-                  ? "City not set"
-                  : "Waiting for weather"}
+                  ? "Sted ikke valgt"
+                  : "Venter på værdata"}
             </h2>
             <p className="subtle" id="feels">
               {c
-                ? "Feels like " +
+                ? "Føles som " +
                   round(c.apparent_temperature) +
                   "° · " +
-                  (c.is_day ? "Daytime" : "Nighttime")
-                : "Set your location to get started."}
+                  (c.is_day ? "Dag" : "Natt")
+                : "Velg et sted for å se været."}
             </p>
             <div className="high-low" id="high-low">
               {d
-                ? "High " +
+                ? "Maks " +
                   round(d!.temperature_2m_max[0]) +
-                  "°  /  Low " +
+                  "° / Min " +
                   round(d!.temperature_2m_min[0]) +
                   "°"
                 : "—"}
@@ -160,10 +160,10 @@ function WeatherContent({ s }: { s: WeatherState }) {
           <div className="hero-bottom">
             <span id="weather-note">
               {data
-                ? (stale ? "Saved conditions" : "Current conditions") +
+                ? (stale ? "Lagret værstatus" : "Været nå") +
                   " · " +
                   s.city.name
-                : "Choose a city to load weather."}
+                : "Velg et sted for å hente været."}
             </span>
             <Icon name="arrow" />
           </div>
@@ -176,16 +176,16 @@ function WeatherContent({ s }: { s: WeatherState }) {
             <div>
               <p className="eyebrow">
                 {forecast.days[0]?.isToday
-                  ? "CHANCE OF RAIN TODAY"
-                  : "CHANCE OF RAIN"}
+                  ? "NEDBØRSJANSE I DAG"
+                  : "NEDBØRSJANSE"}
               </p>
               <strong id="rain">
                 {d ? round(d!.precipitation_probability_max[0]) + "%" : "—"}
               </strong>
               <p className="subtle" id="rain-note">
                 {(d?.precipitation_probability_max[0] ?? 0) >= 50
-                  ? "Keep an umbrella nearby."
-                  : "Low chance of rain."}
+                  ? "Ta gjerne med paraply."
+                  : "Liten sjanse for nedbør."}
               </p>
             </div>
           </article>
@@ -194,12 +194,12 @@ function WeatherContent({ s }: { s: WeatherState }) {
               <Icon name="wind" />
             </span>
             <div>
-              <p className="eyebrow">WIND</p>
+              <p className="eyebrow">VIND</p>
               <strong id="wind">
-                {c ? round(c!.wind_speed_10m) + " km/h" : "—"}
+                {c ? round(c!.wind_speed_10m) + " km/t" : "—"}
               </strong>
               <p className="subtle" id="humidity">
-                {c ? "Humidity " + round(c.relative_humidity_2m) + "%" : "—"}
+                {c ? "Luftfuktighet " + round(c.relative_humidity_2m) + "%" : "—"}
               </p>
             </div>
           </article>
@@ -208,18 +208,18 @@ function WeatherContent({ s }: { s: WeatherState }) {
               <Icon name="sunset" />
             </span>
             <div>
-              <p className="eyebrow">SUNSET</p>
+              <p className="eyebrow">SOLNEDGANG</p>
               <strong id="sunset">
                 {d?.sunset[0] ? time(s, d!.sunset[0] * 1000) : "—"}
               </strong>
-              <p className="subtle">Local time</p>
+              <p className="subtle">Lokal tid</p>
             </div>
           </article>
         </div>
       </div>
       <article className="card forecast-card">
         <div className="section-title">
-          <h3>The next few hours</h3>
+          <h3>De neste timene</h3>
           <span className="subtle" />
         </div>
         <div id="hourly" className="hourly">
@@ -227,7 +227,7 @@ function WeatherContent({ s }: { s: WeatherState }) {
             forecast.hours.map(({ time: t, index: i, isNow }) => (
               <div className="hour" key={t}>
                 <span>
-                  {isNow ? "Now" : time(s, t * 1000, { minute: undefined })}
+                  {isNow ? "Nå" : time(s, t * 1000, { minute: undefined })}
                 </span>
                 <Icon
                   name={
@@ -238,7 +238,7 @@ function WeatherContent({ s }: { s: WeatherState }) {
                 />
                 <strong>{round(h!.temperature_2m[i])}°</strong>
                 <span className="precip">
-                  {round(h!.precipitation_probability[i])}% rain
+                  {round(h!.precipitation_probability[i])}% nedbør
                 </span>
               </div>
             ))
@@ -249,10 +249,10 @@ function WeatherContent({ s }: { s: WeatherState }) {
       </article>
       <article className="card days-card" hidden={!data}>
         <div className="section-title">
-          <h3>Five-day forecast</h3>
+          <h3>Femdagersvarsel</h3>
           <span id="updated" className="tiny">
             {data
-              ? "Fetched " +
+              ? "Hentet " +
                 time(
                   s,
                   data.fetchedAt || s.now,
@@ -266,8 +266,8 @@ function WeatherContent({ s }: { s: WeatherState }) {
             <div className="day" key={t}>
               <span>
                 {isToday
-                  ? "Today"
-                  : new Intl.DateTimeFormat("en-CA", {
+                  ? "I dag"
+                  : new Intl.DateTimeFormat("nb-NO", {
                       timeZone: s.city.timezone,
                       weekday: "short",
                       ...(isPast ? { month: "short", day: "numeric" } : {}),
@@ -284,12 +284,12 @@ function WeatherContent({ s }: { s: WeatherState }) {
       </article>
       <footer>
         <span>
-          Forecast by{" "}
+          Værdata fra{" "}
           <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">
             Open-Meteo
           </a>
         </span>
-        <span id="weather-source">Refreshes every 15 minutes</span>
+        <span id="weather-source">Oppdateres hvert kvarter</span>
       </footer>
     </>
   );
@@ -321,14 +321,14 @@ function OverviewWeatherContent({ s }: { s: WeatherState }) {
             {w
               ? window.SkylitWeatherArt.describe(w.code).label
               : s.city.latitude === null
-                ? "Choose your city in Settings."
-                : "Weather unavailable"}
+                ? "Velg sted i innstillingene."
+                : "Værdata utilgjengelig"}
           </h2>
           <p id="overview-weather-detail" className="subtle">
             {w
-              ? "High " +
+              ? "Maks " +
                 round(d!.temperature_2m_max[0]) +
-                "° / Low " +
+                "° / Min " +
                 round(d!.temperature_2m_min[0]) +
                 "°"
               : ""}
@@ -339,7 +339,7 @@ function OverviewWeatherContent({ s }: { s: WeatherState }) {
           variant="ghost"
           className="overview-forecast-link"
           data-go="weather"
-          aria-label="Open full weather forecast"
+          aria-label="Åpne hele værvarselet"
         >
           <Icon name="arrow" />
         </Button>
@@ -348,19 +348,19 @@ function OverviewWeatherContent({ s }: { s: WeatherState }) {
         {[
           [
             "drop",
-            "Rain today",
+            "Nedbør i dag",
             "overview-rain",
             w ? round(d!.precipitation_probability_max[0]) + "%" : "—",
           ],
           [
             "wind",
-            "Wind",
+            "Vind",
             "overview-wind",
-            w ? round(c!.wind_speed_10m) + " km/h" : "—",
+            w ? round(c!.wind_speed_10m) + " km/t" : "—",
           ],
           [
             "sunset",
-            "Sunset",
+            "Solnedgang",
             "overview-sunset",
             w && d!.sunset[0] ? time(s, d!.sunset[0] * 1000) : "—",
           ],
@@ -379,10 +379,10 @@ function OverviewWeatherContent({ s }: { s: WeatherState }) {
       <Status id="overview-weather-status" className="tiny" role="status">
         {w
           ? w.stale || !navigator.onLine
-            ? "Saved forecast · Fetched " +
+            ? "Lagret varsel · Hentet " +
               time(s, w.fetchedAt, { month: "short", day: "numeric" })
             : ""
-          : "Open Weather to refresh."}
+          : "Åpne Vær for å oppdatere."}
       </Status>
     </>
   );

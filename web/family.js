@@ -71,8 +71,8 @@
   }
   const chores = page('chores', 'Gjøremål');
   const meals = page('meals', 'Middagsplan');
-  let selected = today();
-  let mealWeek = monday(selected);
+  let choreWeek = monday(today());
+  let mealWeek = choreWeek;
   function weekBar(start, change) {
     const bar = node('div', '', 'family-week');
     const previous = button('‹', () => change(-7));
@@ -87,19 +87,10 @@
   const doneIn = (task, start) => task.weekly ? Boolean(task.done[start]) : Boolean(task.completed && monday(task.completed) === start);
   function renderChores() {
     while (chores.children.length > 1) chores.lastElementChild.remove();
-    const start = monday(selected);
-    const bar = weekBar(start, offset => { selected = shift(selected, offset); renderChores(); });
-    bar.append(button('I dag', () => { selected = today(); renderChores(); }));
+    const start = choreWeek;
+    const bar = weekBar(start, offset => { choreWeek = shift(start, offset); renderChores(); });
+    bar.append(button('Denne uka', () => { choreWeek = monday(today()); renderChores(); }));
     chores.append(bar);
-    const strip = node('div', '', 'family-days');
-    days.forEach((day, index) => {
-      const key = shift(start, index);
-      const tab = button(day.slice(0, 3) + ' ' + date(key).getUTCDate(), () => { selected = key; renderChores(); });
-      tab.setAttribute('aria-pressed', String(key === selected));
-      tab.setAttribute('aria-label', day + ' ' + short(key));
-      strip.append(tab);
-    });
-    chores.append(strip);
     const columns = node('div', '', 'family-columns');
     children.forEach(child => {
       const card = node('article', '', 'family-card');
@@ -111,18 +102,14 @@
       progress.value = finished;
       progress.setAttribute('aria-label', 'Ukas fremdrift for ' + child);
       card.append(progress);
-      const visible = tasks.filter(task => {
-        if (task.weekly) return (task.day < 0 || task.day === (date(selected).getUTCDay() + 6) % 7) && selected >= task.start;
-        return task.completed ? task.completed === selected : task.start === selected || (selected === today() && task.start < selected);
-      });
-      if (!visible.length) card.append(node('p', 'Ingen oppgaver denne dagen.', 'subtle'));
-      visible.forEach(task => {
+      if (!tasks.length) card.append(node('p', 'Ingen oppgaver denne uka.', 'subtle'));
+      tasks.forEach(task => {
         const row = node('div', '', 'family-task');
         const done = doneIn(task, start);
         const toggle = button((done ? '✓  ' : '○  ') + task.text, () => {
           const updated = Object.assign({}, task);
           if (task.weekly) updated.done = Object.assign({}, task.done, {[start]: !done});
-          else updated.completed = done ? '' : selected;
+          else updated.completed = done ? '' : start;
           if (save({tasks: state.tasks.map(item => item === task ? updated : item)})) renderChores();
         });
         toggle.setAttribute('aria-pressed', String(done));
@@ -142,14 +129,13 @@
       input.setAttribute('aria-label', 'Oppgave for ' + child);
       const repeat = node('select');
       repeat.setAttribute('aria-label', 'Gjentakelse');
-      ['Én gang på valgt dag', 'Hver uke på valgt ukedag', 'Hver uke, valgfri dag'].forEach(label => repeat.append(node('option', label)));
+      ['Én gang', 'Gjentas hver uke'].forEach(label => repeat.append(node('option', label)));
       const submit = node('button', 'Lagre oppgave');
       form.onsubmit = event => {
         event.preventDefault();
         const title = input.value.trim();
         if (!title) return;
-        const task = {child, text:title, start:selected, weekly:repeat.selectedIndex > 0,
-          day:repeat.selectedIndex === 1 ? (date(selected).getUTCDay() + 6) % 7 : -1, done:{}, completed:''};
+        const task = {child, text:title, start, weekly:repeat.selectedIndex > 0, done:{}, completed:''};
         if (save({tasks: state.tasks.concat(task)})) renderChores();
       };
       form.append(input, repeat, submit);
@@ -206,7 +192,7 @@
     meals.append(list);
   }
   window.addEventListener('skylit-tab', event => {
-    if (event.detail === 'chores') { selected = today(); renderChores(); }
+    if (event.detail === 'chores') { choreWeek = monday(today()); renderChores(); }
     if (event.detail === 'meals') { mealWeek = monday(today()); renderMeals(); }
   });
 })();
