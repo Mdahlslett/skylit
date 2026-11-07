@@ -41,6 +41,7 @@ public class MainActivity extends Activity {
   private LocalMedia media;
   private AsyncExport exports;
   private PhoneManagement phone;
+  private SchoolPlans schoolPlans;
   private AppUpdates updates;
   private final java.util.concurrent.ExecutorService imports=java.util.concurrent.Executors.newSingleThreadExecutor();
   private int pickerKind;
@@ -62,7 +63,8 @@ public class MainActivity extends Activity {
     updates=AppUpdates.get(this);
     calendars=new CalendarStore(getSharedPreferences("skylit-calendars",MODE_PRIVATE));
     photos=new PhotoStore(this);photoMail=new PhotoMail(this,photos,this::notifyLibrary);
-    media=new LocalMedia(this,photos);exports=new AsyncExport(new AsyncExport.Target(){public String begin(){return media.beginExport();}public boolean append(String id,String chunk){return media.appendExport(id,chunk);}public String finish(String id)throws Exception{return media.finishExport(id);}public void cancel(){media.cancelExport();}});phone=new PhoneManagement(this,photos,media,new PhoneManagement.Dashboard(){
+    schoolPlans=new SchoolPlans(this);
+    media=new LocalMedia(this,photos);exports=new AsyncExport(new AsyncExport.Target(){public String begin(){return media.beginExport();}public boolean append(String id,String chunk){return media.appendExport(id,chunk);}public String finish(String id)throws Exception{return media.finishExport(id);}public void cancel(){media.cancelExport();}});phone=new PhoneManagement(this,photos,media,schoolPlans,new PhoneManagement.Dashboard(){
       public String request(JSONObject action,long version) throws Exception {
         java.util.concurrent.CompletableFuture<String> result=new java.util.concurrent.CompletableFuture<>();
         runOnUiThread(()->{if(dashboard==null||!phone.active(version)){result.complete(null);return;}String operation=action==null?"SkylitLibrary.remoteState()":"SkylitLibrary.remoteApply("+action.toString()+")";dashboard.evaluateJavascript("JSON.stringify(window.SkylitLibrary&&Skylit.photoManagementCurrent("+version+")?"+operation+":null)",value->{try{Object decoded=new org.json.JSONTokener(value).nextValue();result.complete(decoded instanceof String?(String)decoded:null);}catch(Exception ignored){result.complete(null);}});});return result.get(5,java.util.concurrent.TimeUnit.SECONDS);
@@ -87,6 +89,16 @@ public class MainActivity extends Activity {
       @Override public WebResourceResponse shouldInterceptRequest(WebView view,WebResourceRequest request){
         Uri u=request.getUrl();if(!"https".equals(u.getScheme())||!"appassets.androidplatform.net".equals(u.getHost()))return null;
         String path=u.getPath();if(path==null||"/".equals(path))path="/index.html";
+        if("/school-page".equals(path)){
+          try{
+            String child=u.getQueryParameter("child"),id=u.getQueryParameter("id");
+            int index=Integer.parseInt(u.getQueryParameter("page"));
+            int width=Integer.parseInt(u.getQueryParameter("width"));
+            byte[] png=schoolPlans.render(child,id,index,width);
+            java.util.Map<String,String> headers=new java.util.HashMap<>();headers.put("Cache-Control","no-store");
+            return new WebResourceResponse("image/png",null,200,"OK",headers,new ByteArrayInputStream(png));
+          }catch(Exception e){return missing();}
+        }
         if(path.startsWith("/private-photos/")){String id=path.substring("/private-photos/".length());if(!id.matches("[a-f0-9]{64}\\.jpg"))return missing();try{java.util.Map<String,String> headers=new java.util.HashMap<>();headers.put("Cache-Control","no-store");return new WebResourceResponse("image/jpeg",null,200,"OK",headers,photos.open(id.substring(0,64)));}catch(Exception e){return missing();}}
         if(path.startsWith("/private-clips/")){String id=path.substring("/private-clips/".length());if(!id.matches("[a-f0-9]{64}\\.mp4"))return missing();try{return mediaResponse(photos.clip(id.substring(0,64)),"video/mp4",request.getRequestHeaders().containsKey("Range")?request.getRequestHeaders().get("Range"):request.getRequestHeaders().get("range"));}catch(Exception ignored){return missing();}}
         if("/private-music/soundtrack.m4a".equals(path)){try{java.util.Map<String,String> headers=new java.util.HashMap<>();headers.put("Cache-Control","no-store");return new WebResourceResponse("audio/mp4",null,200,"OK",headers,media.openMusic());}catch(Exception ignored){return missing();}}
@@ -221,6 +233,9 @@ public class MainActivity extends Activity {
     @JavascriptInterface public String mediaExportStatus(String id){return exports.status(id);}
     @JavascriptInterface public void mediaExportCancel(){exports.cancel();}
     @JavascriptInterface public void slideshowBrightness(float value){if(value!=-1&&(value<.05f||value>1||Float.isNaN(value)))return;runOnUiThread(()->{WindowManager.LayoutParams attributes=getWindow().getAttributes();if(attributes.screenBrightness!=value){attributes.screenBrightness=value;getWindow().setAttributes(attributes);}});}
+    @JavascriptInterface public String schoolPlanList(String child){return schoolPlans.snapshot(child).toString();}
+    @JavascriptInterface public boolean schoolPlanRemove(String child,String id){return schoolPlans.remove(child,id);}
+    @JavascriptInterface public boolean schoolPlanStartUpload(String child){return phone.startSchool(child);}
     @JavascriptInterface public boolean photoManagementStart(){return phone.start();}
     @JavascriptInterface public String photoManagementStatus(){return phone.status();}
     @JavascriptInterface public boolean photoManagementDecide(String request,boolean allow){return phone.decide(request,allow);}

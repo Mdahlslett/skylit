@@ -1,0 +1,20 @@
+
+.school-page.active{height:calc(100vh - 2 * var(--page-pad,24px) - 28px);display:flex;flex-direction:column;min-height:480px;position:relative}
+.school-heading{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.school-heading h1{margin:0}
+.school-tabs{display:flex;margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.school-tabs button{min-width:110px;min-height:48px;margin-right:10px}
+.school-tabs button[aria-selected=true]{background:var(--soft);border-color:var(--accent);font-weight:600}
+.school-documents{display:flex;flex-shrink:0;overflow-x:auto;max-height:60px;margin-bottom:8px}
+.school-documents button{white-space:nowrap;min-height:44px;margin-right:8px}
+.school-documents button[aria-pressed=true]{border-color:var(--accent);background:var(--soft)}
+.school-controls{display:flex;align-items:center;flex-wrap:wrap;flex-shrink:0;margin-bottom:8px}
+.school-controls>*{margin-right:8px;min-height:44px}
+.school-controls span{min-width:100px;display:flex;align-items:center}
+.school-controls .quiet{margin-left:auto}
+.school-viewer{flex:1;min-height:200px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center;touch-action:pan-x pan-y}
+.school-pdf-page{display:block;max-width:none;margin:0 auto;background:white}
+.school-upload-panel{position:absolute;right:0;top:70px;width:360px;max-width:90%;max-height:calc(100% - 80px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 8px 36px #0004;z-index:10}
+.school-upload-panel .phone-pair-qr{display:block;width:260px;max-width:100%;height:auto;margin:12px auto}
+.school-upload-panel button{margin:6px 4px 0 0;min-height:44px}
+.school-pair-number{display:block;font-size:30px;letter-spacing:4px;margin:14px 0}
