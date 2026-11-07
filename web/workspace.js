@@ -30,7 +30,8 @@
   function saved(message='Lagret på rammen'){feedback.textContent=message;}
   app.settingsFeedback=message=>{saved(message);$('saved').textContent=message;};
   function openSettings(id=category,from=null){
-    if(paused||window.SkylitPhotos.isOpen())return;
+    if(paused)return;
+    if(window.SkylitPhotos.isOpen())window.SkylitPhotos.close();
     if(settingsOpen()&&id!==category&&app.settingsBeforeLeave&&!app.settingsBeforeLeave(()=>openSettings(id,from)))return;
     if(native?.closeService)native.closeService();
     const opening=!settingsOpen();
