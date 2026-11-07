@@ -205,10 +205,15 @@ public class MainActivity extends Activity {
     @JavascriptInterface public void openCalendar(String url){if(validCalendar(url))runOnUiThread(()->openRemote(url,false,false));}
     @JavascriptInterface public void openWifiSettings(){runOnUiThread(()->{try{startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));}catch(android.content.ActivityNotFoundException e){Toast.makeText(MainActivity.this,"Wi-Fi settings are unavailable on this device.",Toast.LENGTH_LONG).show();}});}
     @JavascriptInterface public void openDeveloperSettings(){runOnUiThread(()->{try{startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));}catch(android.content.ActivityNotFoundException e){Toast.makeText(MainActivity.this,"Developer settings are unavailable on this device.",Toast.LENGTH_LONG).show();}});}
+    @JavascriptInterface public void gameNight(boolean night){runOnUiThread(()->{
+      prefs.edit().putBoolean("game_night",night).apply();
+      Intent display=new Intent("no.skylit.klooni.BRIGHTNESS").setPackage("no.skylit.klooni.dashboard");
+      display.putExtra("skylit.night",night);display.putExtra("skylit.brightness",getWindow().getAttributes().screenBrightness);sendBroadcast(display);
+    });}
     @JavascriptInterface public void openGame(){runOnUiThread(()->{
       Intent launch=getPackageManager().getLaunchIntentForPackage("no.skylit.klooni.dashboard");
       if(launch==null){Toast.makeText(MainActivity.this,"Spillet er ikke installert.",Toast.LENGTH_LONG).show();return;}
-      launch.putExtra("skylit.brightness",getWindow().getAttributes().screenBrightness);
+      launch.putExtra("skylit.brightness",getWindow().getAttributes().screenBrightness);launch.putExtra("skylit.night",prefs.getBoolean("game_night",false));
       try{startActivity(launch);}catch(android.content.ActivityNotFoundException|SecurityException e){Toast.makeText(MainActivity.this,"Kunne ikke åpne spillet.",Toast.LENGTH_LONG).show();}
     });}
     @JavascriptInterface public void openDavx(){runOnUiThread(()->{

@@ -194,3 +194,54 @@ edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>{
     @Override protected void onStop(){if(lightRegistered){unregisterReceiver(frameLight);lightRegistered=false;}super.onStop();}
 `+s.slice(end);
 });
+
+const nightTheme=JSON.parse(fs.readFileSync(path.join(root,'android/assets/themes/default.theme'),'utf8'));
+nightTheme.name='Skylit natt';
+nightTheme.colors={
+ background:'241f1cff',foreground:'f2e7d5ff',buttons:['554437ff','514b3aff','3e5145ff','59463fff'],
+ empty_cell:'3e3630ff',
+ cells:['7c899eff','8e9c78ff','799d8bff','b49b68ff','ac8566ff','a3818aff','a77568ff','7f946fff','73949eff'],
+ current_score:'e7b487ff',high_score:'b6bc93ff',bonus:'e2d3bdff',band:'332d28ff',text:'f2e7d5ff'
+};
+fs.writeFileSync(path.join(root,'android/assets/themes/skylit-night.theme'),JSON.stringify(nightTheme,null,2));
+edit('core/src/dev/lonami/klooni/Klooni.java',s=>s.replace('    public static Theme theme;','    public static Theme theme;\n    public static boolean frameNight;').replace('prefs.getString("themeName", "default")','(frameNight ? "skylit-night" : "default")'));
+edit('core/src/dev/lonami/klooni/game/BaseScorer.java',s=>s.replace('            currentCaption.draw(batch,1f);recordCaption.draw(batch,1f);','            currentCaption.setColor(Klooni.theme.textColor);recordCaption.setColor(Klooni.theme.textColor);\n            currentCaption.draw(batch,1f);recordCaption.draw(batch,1f);'));
+edit('core/src/dev/lonami/klooni/screens/MainMenuScreen.java',s=>{
+ s=s.replace('    private final Stage stage;','    private final Stage stage;\n    private com.badlogic.gdx.scenes.scene2d.ui.TextButton framePlay;\n    private com.badlogic.gdx.scenes.scene2d.ui.Label frameRecord;');
+ s=s.replace('        table.add(record).padBottom(40).row();','        frameRecord=record;table.add(record).padBottom(40).row();');
+ s=s.replace('        table.add(playButton).width','        framePlay=playButton;table.add(playButton).width');
+ return s.replace('        stage.draw();',`
+        com.badlogic.gdx.scenes.scene2d.ui.ImageButton.ImageButtonStyle current=Klooni.theme.getStyle(0);
+        framePlay.getStyle().up=current.up;framePlay.getStyle().down=current.down;framePlay.getStyle().fontColor=Klooni.theme.textColor;
+        frameRecord.setColor(Klooni.theme.highScore);
+        stage.draw();`);
+});
+edit('android/src/dev/lonami/klooni/AndroidLauncher.java',s=>{
+ s=s.replace('        initialize(new Klooni(shareChallenge), config);','        frameGame=new Klooni(shareChallenge);initialize(frameGame, config);');
+ s=s.replace('android.widget.LinearLayout controls=new android.widget.LinearLayout(this);','android.widget.LinearLayout controls=new android.widget.LinearLayout(this);frameControls=controls;');
+ s=s.replace('        addContentView(controls,params);','        addContentView(controls,params);styleFrameControls(Klooni.frameNight);');
+ s=s.replace('    private boolean lightRegistered;','    private boolean lightRegistered;\n    private Klooni frameGame;\n    private android.widget.LinearLayout frameControls;');
+ s=s.replace('        light.edit().putFloat("brightness",value).apply();',`
+        boolean night=intent!=null&&intent.hasExtra("skylit.night")?intent.getBooleanExtra("skylit.night",false):light.getBoolean("night",false);
+        boolean changed=Klooni.frameNight!=night;Klooni.frameNight=night;
+        light.edit().putFloat("brightness",value).putBoolean("night",night).apply();
+        styleFrameControls(night);
+        if(changed&&frameGame!=null&&com.badlogic.gdx.Gdx.app!=null)com.badlogic.gdx.Gdx.app.postRunnable(()->{
+            if(Klooni.theme!=null)Klooni.theme.update(night?"skylit-night":"default");
+        });`);
+ const end=s.lastIndexOf('\n}');
+ return s.slice(0,end)+`
+    private void styleFrameControls(boolean night){
+        if(frameControls==null)return;
+        for(int i=0;i<frameControls.getChildCount();i++){
+            android.widget.Button button=(android.widget.Button)frameControls.getChildAt(i);
+            button.setTextColor(android.graphics.Color.parseColor(night?"#f2e7d5":"#39332d"));
+            android.graphics.drawable.GradientDrawable background=new android.graphics.drawable.GradientDrawable();
+            background.setColor(android.graphics.Color.parseColor(night?"#332d28":"#e0d7c9"));
+            background.setCornerRadius(12*getResources().getDisplayMetrics().density);
+            background.setStroke(1,android.graphics.Color.parseColor(night?"#51463b":"#cbc0b0"));
+            button.setBackground(background);
+        }
+    }
+`+s.slice(end);
+});

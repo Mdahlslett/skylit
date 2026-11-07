@@ -66,6 +66,7 @@
     const night = solar.mode === 'dark';
     const percent = values.auto ? (night ? values.night : values.day) : values.manual;
     if(native && native.slideshowBrightness) native.slideshowBrightness(percent / 100);
+    if(native && native.gameNight) native.gameNight(night);
     status.textContent = values.auto ? (night ? 'Natt' : 'Dag') + ' · ' + percent + ' %' : 'Fast lysstyrke · ' + percent + ' %';
     return {automatic:values.auto,night,percent};
   }
