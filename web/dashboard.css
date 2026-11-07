@@ -437,3 +437,11 @@
 #overview .dashboard-module[data-module=photos] .overview-photo-stack img{position:absolute;display:block;top:0;right:0;bottom:0;left:0;width:100%;height:100%;border:0;border-radius:var(--radius);box-shadow:none;transform:none;object-fit:cover;opacity:0;transition:opacity 900ms ease}
 #overview .dashboard-module[data-module=photos] .overview-photo-stack img.showing{opacity:1}
 @media(prefers-reduced-motion:reduce){#overview .dashboard-module[data-module=photos] .overview-photo-stack img{transition:none}}
+
+@media(min-width:800px){
+  #overview .overview-grid.dashboard-fill-bottom{
+    height:var(--dashboard-fill-height,calc(100vh - 48px));
+    max-height:none;
+    grid-template-rows:repeat(9,minmax(0,1fr)) repeat(3,minmax(0,1.55fr))!important;
+  }
+}

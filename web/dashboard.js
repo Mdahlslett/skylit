@@ -142,6 +142,10 @@
   setInterval(refreshRuter,15000);
 
   function applyLayout(){
+    const week = model.preset('week').modules;
+    grid.classList.toggle('dashboard-fill-bottom',week.every(expected=>saved.modules.some(item=>
+      item.type===expected.type&&['x','y','w','h'].every(key=>item[key]===expected[key])
+    ))&&saved.modules.length===week.length);
     for(const [type,n] of wrappers){const item=saved.modules.find(item=>item.type===type);n.hidden=!item;if(item)position(n,item);if(type==='plans')n.dataset.week=String(!!item&&item.w>=7);}
     // Match reading and keyboard order to the visible arrangement.
     saved.modules.slice().sort((a,b)=>a.y-b.y||a.x-b.x).forEach(item=>grid.append(wrappers.get(item.type)));
@@ -168,6 +172,13 @@
     });
   }
   function sizeModules(){
+    if (grid.classList.contains('dashboard-fill-bottom') && grid.clientWidth && window.innerWidth >= 800) {
+      const top = grid.getBoundingClientRect().top + window.scrollY;
+      const page = $('overview');
+      const bottom = parseFloat(getComputedStyle(page).paddingBottom) || 0;
+      const height = Math.max(530,Math.floor(window.innerHeight-top-Math.max(12,bottom)));
+      grid.style.setProperty('--dashboard-fill-height',height+'px');
+    }
     for(const [type,n] of wrappers){if(n.hidden)continue;const rect=n.getBoundingClientRect(),w=rect.width,h=rect.height;if(!w||!h)continue;
       n.dataset.density=w<340||h<220?'compact':'regular';n.dataset.short=String(h<280);n.dataset.narrow=String(w<340);
       if(type==='photos')sizePhotos(n,w,h);
